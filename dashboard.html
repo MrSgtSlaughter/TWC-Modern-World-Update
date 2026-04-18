@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TWC: Teacher Dashboard</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0f1a;color:#d1d5db;font-family:'Segoe UI',sans-serif;padding:12px}
+  h1{text-align:center;font-size:22px;color:#FFD700;margin-bottom:4px}
+  .sub{text-align:center;font-size:11px;opacity:.4;margin-bottom:12px}
+  .tabs{display:flex;justify-content:center;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+  .tab{padding:7px 16px;border-radius:7px;cursor:pointer;font-weight:700;font-size:12px;border:none;font-family:inherit;transition:all .2s}
+  .tab.active{color:#000} .tab:not(.active){background:rgba(255,255,255,.06);color:rgba(255,255,255,.35)}
+  .tab[data-p="1st"]{--c:#EF4444}.tab[data-p="2nd"]{--c:#10B981}.tab[data-p="5th"]{--c:#F59E0B}.tab[data-p="6th"]{--c:#3B82F6}.tab[data-p="all"]{--c:#A855F7}
+  .tab.active{background:var(--c)}
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+  .sum-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px;text-align:center}
+  .sum-num{font-size:22px;font-weight:800}.sum-label{font-size:9px;opacity:.4}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th{text-align:left;padding:5px 6px;background:rgba(255,255,255,.06);color:#FFD700;font-size:9px;position:sticky;top:0}
+  td{padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.04)}
+  tr:hover td{background:rgba(255,255,255,.03)}
+  .per{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;display:inline-block}
+  .per-1st{background:rgba(239,68,68,.15);color:#EF4444}
+  .per-2nd{background:rgba(16,185,129,.15);color:#10B981}
+  .per-5th{background:rgba(245,158,11,.15);color:#F59E0B}
+  .per-6th{background:rgba(59,130,246,.15);color:#3B82F6}
+</style>
+</head>
+<body>
+<h1>🏛️ TWC: Teacher Dashboard</h1>
+<div class="sub">Leaderboard &amp; Empire Overview</div>
+
+<div style="text-align:center;margin-bottom:12px">
+  <button style="background:#FFD700;color:#000;font-size:13px;padding:8px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:700" onclick="loadAll()">🔄 Refresh All</button>
+  <span id="lastUpdate" style="font-size:9px;opacity:.3;margin-left:8px"></span>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div class="summary" id="summary"></div>
+<div id="content" style="max-height:72vh;overflow:auto"></div>
+
+<div style="text-align:center;margin-top:16px;font-size:8px;opacity:.12">
+  TWC: The Modern Empire · © 2026 Jason Slaughter · PixelED Path, LLC
+</div>
+
+<script>
+const RT_URL="https://minigolf-fd9ea-default-rtdb.firebaseio.com/twc_state";
+
+let gameState={own:{},gold:{},govt:{},skip:{},nuked:[]};
+let currentTab="all";
+
+// Derived scores
+const LEGACY={'1st':56,'2nd':348,'5th':165,'6th':293};
+const CV={
+  'US':25,'CN':24,'RU':22,'DE':22,'GB':22,'FR':21,'JP':19,'IN':20,'BR':20,'CA':19,
+  'AU':18,'SA':18,'TR':18,'EG':17,'IT':20,'ES':19,'MX':18,'KR':19,'ID':18,'NO':19,
+  'SE':18,'NL':19,'PA':16,'AE':18,'PL':15,'UA':17,'AR':18,'ZA':16,'NG':16,
+  'CH':18,'BE':17,'DK':18,'AT':16,'FI':16,'TW':18,'MY':18,'TH':16,'VN':15,'PH':17,
+  'IL':17,'QA':16,'KW':16,'IR':16,'IQ':14,'KZ':16,'CL':16,'CO':17,'PE':15,'VE':16,
+  'MA':15,'TN':15,'PT':17,'IS':15,'UY':17,'GL':20
+};
+function cval(iso){ return CV[iso]||5; }
+
+const NAMES={
+  'US':'United States','CN':'China','RU':'Russia','DE':'Germany','GB':'United Kingdom',
+  'FR':'France','JP':'Japan','IN':'India','BR':'Brazil','CA':'Canada','AU':'Australia',
+  'SA':'Saudi Arabia','TR':'Turkey','EG':'Egypt','IT':'Italy','ES':'Spain','MX':'Mexico',
+  'KR':'South Korea','ID':'Indonesia','NO':'Norway','SE':'Sweden','NL':'Netherlands',
+  'PA':'Panama','AE':'UAE','PL':'Poland','UA':'Ukraine','AR':'Argentina','ZA':'South Africa',
+  'NG':'Nigeria','CH':'Switzerland','BE':'Belgium','DK':'Denmark','AT':'Austria','FI':'Finland',
+  'TW':'Taiwan','MY':'Malaysia','TH':'Thailand','VN':'Vietnam','PH':'Philippines',
+  'IL':'Israel','QA':'Qatar','KW':'Kuwait','IR':'Iran','IQ':'Iraq','KZ':'Kazakhstan',
+  'CL':'Chile','CO':'Colombia','PE':'Peru','VE':'Venezuela','MA':'Morocco','TN':'Tunisia',
+  'PT':'Portugal','IS':'Iceland','UY':'Uruguay','GL':'Greenland'
+};
+function cname(iso){ return NAMES[iso]||iso; }
+
+const GOVTS={
+  'Democracy':'🗳️','Republic':'📜','Monarchy':'👑','Dictatorship':'✊',
+  'Authoritarianism':'🔒','Totalitarianism':'⚡','Oligarchy':'💰','Theocracy':'✝️'
+};
+const CLS_NAMES={'1st':'1st Hour','2nd':'2nd Hour','5th':'5th Hour','6th':'6th Hour'};
+const CLS_COLORS={'1st':'#EF4444','2nd':'#10B981','5th':'#F59E0B','6th':'#3B82F6'};
+const CLS_EMOJI={'1st':'🔴','2nd':'🟢','5th':'🟡','6th':'🔵'};
+
+function getScore(cls){
+  let pts=LEGACY[cls]||0;
+  const own=gameState.own||{};
+  Object.entries(own).forEach(([iso,owner])=>{ if(owner===cls) pts+=cval(iso); });
+  return pts;
+}
+function getTerrCount(cls){
+  return Object.values(gameState.own||{}).filter(o=>o===cls).length;
+}
+
+async function loadAll(){
+  document.getElementById("content").innerHTML='<div style="text-align:center;padding:30px;opacity:.3">Loading...</div>';
+  try{
+    const r=await fetch(RT_URL+".json?t="+Date.now());
+    if(r.ok){
+      const d=await r.json();
+      if(d){
+        gameState.own   = d.own   || {};
+        gameState.gold  = d.gold  || {};
+        gameState.govt  = d.govt  || {};
+        gameState.skip  = d.skip  || {};
+        gameState.nuked = d.nuked || [];
+        gameState.log   = d.log   || [];
+      }
+    }
+  }catch(e){console.error("Firebase:",e);}
+  document.getElementById("lastUpdate").textContent="Updated "+new Date().toLocaleTimeString();
+  renderTabs();
+  render();
+}
+
+function renderTabs(){
+  const periods=["all","1st","2nd","5th","6th"];
+  document.getElementById("tabs").innerHTML=periods.map(p=>{
+    let label;
+    if(p==="all") label="All Classes";
+    else label=p+" Hour";
+    return`<button class="tab ${currentTab===p?'active':''}" data-p="${p}" onclick="setTab('${p}')">${CLS_EMOJI[p]||'🌍'} ${label}</button>`;
+  }).join("");
+}
+
+function setTab(t){currentTab=t;renderTabs();render();}
+
+function render(){
+  const periods = currentTab==="all" ? ['1st','2nd','5th','6th'] : [currentTab];
+
+  // Summary row
+  const rows = ['1st','2nd','5th','6th']
+    .map(c=>({c,s:getScore(c),t:getTerrCount(c),g:gameState.gold[c]||0}))
+    .sort((a,b)=>b.s-a.s);
+
+  if(currentTab==="all"){
+    const total = rows.reduce((s,r)=>s+r.t,0);
+    const totalGold = rows.reduce((s,r)=>s+r.g,0);
+    document.getElementById("summary").innerHTML=`
+      ${rows.map((r,i)=>{
+        const emojis=['🥇','🥈','🥉','4️⃣'];
+        return`<div class="sum-card">
+          <div class="sum-num" style="color:${CLS_COLORS[r.c]}">${r.s.toLocaleString()}</div>
+          <div class="sum-label">${emojis[i]} ${CLS_NAMES[r.c]}</div>
+        </div>`;
+      }).join('')}`;
+  } else {
+    const r = rows.find(x=>x.c===currentTab)||{s:0,t:0,g:0};
+    const govt = gameState.govt[currentTab];
+    const skip = gameState.skip[currentTab]||0;
+    document.getElementById("summary").innerHTML=`
+      <div class="sum-card"><div class="sum-num" style="color:#FFD700">${r.s.toLocaleString()}</div><div class="sum-label">Total Score</div></div>
+      <div class="sum-card"><div class="sum-num" style="color:${CLS_COLORS[currentTab]}">${r.t}</div><div class="sum-label">Territories</div></div>
+      <div class="sum-card"><div class="sum-num" style="color:#10B981">$${r.g.toLocaleString()}</div><div class="sum-label">Gold</div></div>
+      <div class="sum-card"><div class="sum-num" style="color:#A855F7">${govt?GOVTS[govt]+' '+govt:'—'}</div><div class="sum-label">Government${skip>0?' · ⏸'+skip:''}</div></div>`;
+  }
+
+  // Main table
+  if(currentTab==="all"){
+    // Leaderboard view
+    let html=`<table><thead><tr><th>#</th><th>Class</th><th>Legacy</th><th>Territory Pts</th><th>Total</th><th>Territories</th><th>Gold</th><th>Government</th></tr></thead><tbody>`;
+    const emojis=['🥇','🥈','🥉','4️⃣'];
+    rows.forEach((r,i)=>{
+      const govt=gameState.govt[r.c];
+      const skip=gameState.skip[r.c]||0;
+      html+=`<tr>
+        <td style="color:#FFD700;font-weight:700">${emojis[i]}</td>
+        <td style="font-weight:700;color:${CLS_COLORS[r.c]}">${CLS_EMOJI[r.c]} ${CLS_NAMES[r.c]}</td>
+        <td style="color:#888">${LEGACY[r.c]}</td>
+        <td style="color:#aaa">${r.s - LEGACY[r.c]}</td>
+        <td style="font-weight:700;color:#FFD700">${r.s.toLocaleString()}</td>
+        <td>${r.t}</td>
+        <td style="color:#10B981">$${r.g.toLocaleString()}</td>
+        <td>${govt?(GOVTS[govt]+' '+govt):'—'}${skip>0?` <span style="background:#cc2200;color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">⏸${skip}</span>`:''}</td>
+      </tr>`;
+    });
+    html+='</tbody></table>';
+    document.getElementById("content").innerHTML=html;
+  } else {
+    // Territory detail view for one period
+    const own = gameState.own||{};
+    const nuked = gameState.nuked||[];
+    const territories = Object.entries(own)
+      .filter(([iso,owner])=>owner===currentTab)
+      .map(([iso])=>({iso, name:cname(iso), pts:cval(iso)}))
+      .sort((a,b)=>b.pts-a.pts);
+
+    if(!territories.length){
+      document.getElementById("content").innerHTML='<div style="text-align:center;padding:30px;opacity:.3">No territories claimed yet.</div>';
+      return;
+    }
+    let html=`<table><thead><tr><th>Country</th><th>ISO</th><th>Points</th></tr></thead><tbody>`;
+    territories.forEach(t=>{
+      html+=`<tr>
+        <td style="font-weight:700">${t.name}</td>
+        <td style="color:#888;font-family:monospace">${t.iso}</td>
+        <td style="color:#FFD700;font-weight:700">${t.pts}</td>
+      </tr>`;
+    });
+    html+='</tbody></table>';
+    document.getElementById("content").innerHTML=html;
+  }
+}
+
+loadAll();
+setInterval(loadAll,30000);
+</script>
+</body>
+</html>

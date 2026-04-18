@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TWC Command Center — Teacher Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c08;--panel:#0d1410;--border:#1e2e1e;
+  --green:#3a7d44;--lime:#6aab3a;--gold:#d4a017;
+  --red:#cc2200;--text:#c8d8c0;--dim:rgba(200,216,192,0.35);
+  --mono:'Share Tech Mono',monospace;--head:'Orbitron',sans-serif;
+  --p1:#cc3333;--p2:#33aa44;--p5:#ddbb22;--p6:#3377cc;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14px;min-height:100vh;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(58,125,68,.05) 39px,rgba(58,125,68,.05) 40px),
+  repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(58,125,68,.03) 39px,rgba(58,125,68,.03) 40px);}
+
+/* ── PIN ── */
+#pin-gate{position:fixed;inset:0;background:rgba(0,0,0,.97);display:flex;align-items:center;justify-content:center;z-index:9999}
+#pin-box{background:var(--panel);border:2px solid var(--gold);padding:40px;text-align:center;max-width:340px;width:100%}
+#pin-box h2{font-family:var(--head);font-size:18px;letter-spacing:4px;color:var(--gold);margin-bottom:6px}
+#pin-box p{font-size:11px;color:var(--dim);margin-bottom:20px;letter-spacing:1px}
+#pin-input{width:100%;padding:12px;font-family:var(--mono);font-size:22px;letter-spacing:8px;text-align:center;
+  background:#0a0f0a;border:1px solid var(--green);color:var(--lime);outline:none;margin-bottom:14px}
+#pin-err{color:var(--red);font-size:11px;min-height:16px}
+
+/* ── TOP BAR ── */
+#topbar{background:linear-gradient(180deg,#0e1a0e,#080c08);border-bottom:2px solid var(--green);
+  padding:10px 20px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(58,125,68,.25)}
+#topbar h1{font-family:var(--head);font-size:15px;letter-spacing:4px;color:var(--gold)}
+#topbar .sub{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:2px}
+#clock{font-size:11px;color:var(--lime);letter-spacing:2px}
+
+/* ── BUTTONS ── */
+.btn{background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:var(--head);
+  font-size:10px;letter-spacing:3px;padding:8px 18px;cursor:pointer;transition:all .2s}
+.btn:hover{background:rgba(212,160,23,.12)}
+.btn.green{border-color:var(--lime);color:var(--lime)}
+.btn.green:hover{background:rgba(106,171,58,.12)}
+.btn.red{border-color:var(--red);color:var(--red)}
+.btn.red:hover{background:rgba(204,34,0,.12)}
+.btn:disabled{opacity:.25;cursor:default}
+
+/* ── LAYOUT ── */
+#main{padding:16px 20px;max-width:900px;margin:0 auto}
+
+/* ── PANELS ── */
+.panel{background:var(--panel);border:1px solid var(--border);margin-bottom:14px}
+.ph{background:rgba(58,125,68,.08);border-bottom:1px solid var(--border);padding:8px 14px;
+  display:flex;align-items:center;justify-content:space-between}
+.ph h3{font-family:var(--head);font-size:10px;letter-spacing:3px;color:var(--gold)}
+.pb{padding:14px}
+
+/* ── BCB INBOX ── */
+#bcbl{display:flex;flex-direction:column;gap:7px}
+.bcbc{background:#0a0f0a;border:1px solid rgba(106,171,58,.3);padding:8px 10px;
+  display:flex;align-items:center;gap:8px}
+.bcbc.dep{border-color:rgba(255,255,255,.08);opacity:.4}
+.bcb-em{font-size:20px;flex-shrink:0}
+.bcb-inf{flex:1;min-width:0}
+.bcb-nm{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcb-mt{font-size:9px;color:var(--dim);letter-spacing:1px}
+.bcb-btn{flex-shrink:0;padding:4px 8px;font-family:var(--head);font-size:8px;letter-spacing:2px;
+  border:1px solid var(--lime);color:var(--lime);background:transparent;cursor:pointer;transition:all .2s}
+.bcb-btn:hover{background:rgba(106,171,58,.2)}
+.bcb-btn:disabled{opacity:.3;cursor:default}
+.bem{font-size:10px;color:var(--dim);text-align:center;padding:16px;letter-spacing:1px}
+
+/* ── PERIOD SUMMARY ── */
+.srow{border-left:3px solid;padding:5px 10px;background:rgba(0,0,0,.2);margin-bottom:4px}
+
+/* ── SAVE BAR ── */
+#sbar{position:sticky;bottom:0;background:#0a110a;border-top:1px solid var(--green);
+  padding:8px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:50}
+#smsg{font-size:10px;color:var(--lime);letter-spacing:1px;flex:1}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+.sp{animation:spin .7s linear infinite;display:inline-block}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--green)}
+</style>
+</head>
+<body>
+
+<!-- PIN GATE -->
+<div id="pin-gate">
+  <div id="pin-box">
+    <h2>⚔️ TWC COMMAND</h2>
+    <p>TEACHER ACCESS — ENTER PIN</p>
+    <input id="pin-input" type="password" maxlength="6" placeholder="• • • •" autocomplete="off">
+    <div id="pin-err"></div><br>
+    <button class="btn" onclick="checkPin()">AUTHENTICATE</button>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div><h1>⚔️ TWC COMMAND CENTER</h1><div class="sub">TEACHER PANEL · TOTAL WORLD CONQUEST</div></div>
+  <div id="clock">──</div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="panel">
+    <div class="ph">
+      <h3>🪂 BCB RANGER INBOX</h3>
+      <button onclick="loadBCB()" style="background:none;border:none;color:var(--lime);cursor:pointer;font-size:13px"><span id="bri">↻</span></button>
+    </div>
+    <div class="pb" style="padding:10px"><div id="bcbl"><div class="bem">Loading...</div></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><h3>📊 PERIOD SUMMARY</h3></div>
+    <div class="pb" style="padding:10px"><div id="sumgrid"></div></div>
+  </div>
+</div>
+
+<!-- SAVE BAR -->
+<div id="sbar">
+  <span id="smsg">Ready.</span>
+  <button class="btn green" style="padding:5px 14px;font-size:8px" onclick="loadBCB()">↻ REFRESH BCB</button>
+</div>
+
+<script>
+/* ═══ CONFIG ═══ */
+const PIN='1234'; // ← CHANGE THIS
+const FB='https://minigolf-fd9ea-default-rtdb.firebaseio.com';
+const PERIODS=['1st','2nd','5th','6th'];
+const PDOTS={'1st':'#cc3333','2nd':'#33aa44','5th':'#ddbb22','6th':'#3377cc'};
+
+/* ═══ STATE ═══ */
+let bcbRaw={};
+
+/* ═══ PIN ═══ */
+function checkPin(){
+  const v=document.getElementById('pin-input').value;
+  if(v===PIN){document.getElementById('pin-gate').style.display='none';init();}
+  else{
+    document.getElementById('pin-err').textContent='⛔ INVALID PIN';
+    document.getElementById('pin-input').value='';
+    document.getElementById('pin-input').style.borderColor='var(--red)';
+    setTimeout(()=>{document.getElementById('pin-err').textContent='';document.getElementById('pin-input').style.borderColor='var(--green)';},1500);
+  }
+}
+document.getElementById('pin-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});
+
+/* ═══ INIT ═══ */
+function init(){
+  loadBCB();
+  setInterval(updateClock,1000);updateClock();
+  setInterval(loadBCB,30000);
+  renderSummary();
+}
+
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    n.toLocaleDateString('en-US',{weekday:'short'}).toUpperCase()+' '+
+    n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+/* ═══ PERIOD SUMMARY ── reads from main game Firebase state ══ */
+async function renderSummary(){
+  const g=document.getElementById('sumgrid');
+  if(!g) return;
+  try {
+    const r = await fetch(FB+'/twc_state.json?t='+Date.now());
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    if(!d){ g.innerHTML='<div class="bem">No published state yet.</div>'; return; }
+    const gold = d.gold||{};
+    const own  = d.own||{};
+    // Count territories
+    const terr={'1st':0,'2nd':0,'5th':0,'6th':0};
+    Object.values(own).forEach(cls=>{ if(terr[cls]!==undefined) terr[cls]++; });
+    g.innerHTML='';
+    PERIODS.forEach(p=>{
+      const row=document.createElement('div');
+      row.className='srow';row.style.borderColor=PDOTS[p];
+      row.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:2px">
+        <span style="font-family:var(--head);font-size:10px;letter-spacing:2px;color:${PDOTS[p]}">${p} HOUR</span>
+        <span style="font-size:10px;color:var(--dim)">${terr[p]} territories</span></div>
+        <div style="font-size:11px;color:var(--gold)">$${(gold[p]||0).toLocaleString()} gold</div>`;
+      g.appendChild(row);
+    });
+  } catch(e){
+    g.innerHTML=`<div class="bem">⚠️ ${e.message}</div>`;
+  }
+}
+
+/* ═══ BCB INBOX ═══ */
+async function loadBCB(){
+  const icon=document.getElementById('bri');icon.className='sp';
+  try{
+    const r=await fetch(`${FB}/bcb_rangers.json?t=${Date.now()}`);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    bcbRaw=await r.json()||{};
+    renderBCB();updateBadges();
+  }catch(e){
+    document.getElementById('bcbl').innerHTML=`<div class="bem">⚠️ ${e.message}</div>`;
+  }
+  icon.className='';
+  renderSummary();
+}
+
+function renderBCB(){
+  const list=document.getElementById('bcbl');
+  let all=[];
+  Object.keys(bcbRaw).forEach(period=>{
+    const pd=bcbRaw[period];
+    if(!pd||typeof pd!=='object')return;
+    Object.keys(pd).forEach(key=>{
+      const entry=pd[key];
+      if(entry&&entry.name)all.push({...entry,_period:period,_key:key});
+    });
+  });
+  all.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+  if(!all.length){list.innerHTML='<div class="bem">No rangers submitted yet.</div>';return;}
+  list.innerHTML='';
+  const dep=getDeployed();
+  all.forEach(e=>{
+    const key=e._period+'_'+e._key;
+    const isDep=dep.has(key);
+    const ts=e.timestamp?new Date(e.timestamp).toLocaleTimeString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+    const c=document.createElement('div');c.className='bcbc'+(isDep?' dep':'');
+    c.innerHTML=`<div class="bcb-em">🪖</div>
+      <div class="bcb-inf">
+        <div class="bcb-nm">${e.name||'Unknown'}</div>
+        <div class="bcb-mt">${(e._period||'?').toUpperCase()} HOUR · ${ts}</div>
+      </div>
+      <button class="bcb-btn" ${isDep?'disabled':''} onclick="markRanger('${key}','${e._period}','${e.name||''}')">
+        ${isDep?'✓ DONE':'DEPLOY'}
+      </button>`;
+    list.appendChild(c);
+  });
+}
+
+function getDeployed(){
+  try{return new Set(JSON.parse(localStorage.getItem('twc_deployed_v1')||'[]'));}catch{return new Set();}
+}
+function markDeployed(key){
+  const s=getDeployed();s.add(key);
+  localStorage.setItem('twc_deployed_v1',JSON.stringify([...s]));
+}
+
+function markRanger(key,period,name){
+  markDeployed(key);
+  renderBCB();
+  msg(`🪖 ${name} (${period}) marked as deployed.`);
+}
+
+function updateBadges(){
+  // Update page title with pending count
+  const dep=getDeployed();
+  let pending=0;
+  Object.keys(bcbRaw).forEach(period=>{
+    const pd=bcbRaw[period];if(!pd||typeof pd!=='object')return;
+    Object.keys(pd).forEach(key=>{if(!dep.has(period+'_'+key))pending++;});
+  });
+  document.title = pending>0 ? `(${pending}) TWC Command Center` : 'TWC Command Center — Teacher Panel';
+}
+
+/* ═══ UTILS ═══ */
+function msg(t){document.getElementById('smsg').textContent=t;}
+</script>
+</body>
+</html>
