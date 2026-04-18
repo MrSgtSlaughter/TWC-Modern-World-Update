@@ -99,8 +99,12 @@ body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hi
 .ctrl-label{font-size:.74em;color:#888;display:block;margin-bottom:2px}
 
 /* GOLD ROW */
-.gold-row{display:flex;align-items:center;gap:4px;margin:3px 0;font-size:.78em}
-.gold-amt{background:var(--bg);border:1px solid #ffd700;color:#ffd700;padding:2px 8px;min-width:70px;text-align:center;font-weight:700}
+.gold-row{display:grid;grid-template-columns:44px auto 28px 28px 44px 52px 60px;align-items:center;gap:3px;margin:5px 0;padding:4px 0}
+.gold-amt{background:var(--bg);border:1px solid #ffd700;color:#ffd700;padding:3px 6px;text-align:center;font-weight:700;font-size:.82em;white-space:nowrap}
+.gold-manual{background:var(--bg);border:1px solid #ffd700;color:#ffd700;padding:3px 4px;font-family:var(--font);font-size:.76em;width:60px;text-align:center}
+.gold-manual:focus{outline:1px solid var(--yellow)}
+.gold-pm{background:var(--bg);border:1px solid var(--green);color:var(--green);width:26px;height:26px;font-size:1.1em;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;padding:0}
+.gold-pm:hover{background:var(--yellow);color:var(--bg);border-color:var(--yellow)}
 
 /* MODAL */
 .modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:1000;display:none;align-items:center;justify-content:center}
@@ -346,11 +350,7 @@ body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hi
         <div id="fb-pub-msg" style="font-size:.72em;min-height:16px;margin-top:4px;color:#00ff88"></div>
       </div>
 
-      <!-- BCB RANGER INBOX -->
-      <div class="retro-panel" id="bcb-panel">
-        <h2>🪂 BCB RANGER INBOX <button onclick="loadBCBInbox()" style="background:none;border:none;color:#ffd700;cursor:pointer;font-size:.9em;margin-left:6px" title="Refresh">↻</button></h2>
-        <div id="bcb-inbox-list"><div style="font-size:.75em;color:#555;padding:4px">Loading...</div></div>
-      </div>
+
 
     </div><!-- /sidebar -->
   </div>
@@ -725,13 +725,18 @@ function renderTeacherUI(){
   for(const c of ['1st','2nd','5th','6th']){
     const cl=CLS[c];
     gg+=`<div class="gold-row">
-      <span style="color:${cl.color};font-weight:700;width:60px">${cl.emoji} ${c}</span>
+      <span style="color:${cl.color};font-weight:700;font-size:.8em">${cl.emoji} ${c}</span>
       <span class="gold-amt">$${(S.gold[c]||0).toLocaleString()}</span>
-      <button class="retro-btn sm" onclick="addGold('${c}',50)">+50</button>
+      <button class="gold-pm" onclick="addGold('${c}',50)" title="+50">+</button>
+      <button class="gold-pm" style="border-color:#ff6666;color:#ff6666" onclick="addGold('${c}',-50)" title="-50">−</button>
       <button class="retro-btn sm" onclick="addGold('${c}',100)">+100</button>
       <button class="retro-btn sm" onclick="addGold('${c}',200)">+200</button>
+      <input class="gold-manual" id="gold-manual-${c}" type="number" placeholder="±amt"
+        onkeydown="if(event.key==='Enter'){manualGold('${c}');event.preventDefault()}"
+        title="Type amount, press Enter">
     </div>`;
   }
+  gg+=`<div style="font-size:.68em;color:#555;margin-top:4px;padding:0 2px">± buttons = ±$50 &nbsp;·&nbsp; type amount + Enter for custom</div>`;
   document.getElementById('gold-rows').innerHTML=gg;
 
   renderLB();
@@ -767,9 +772,18 @@ function setGovt(cls, govt){
 }
 
 function addGold(cls, amount){
-  S.gold[cls]=(S.gold[cls]||0)+amount;
+  S.gold[cls]=Math.max(0,(S.gold[cls]||0)+amount);
   saveState(); renderTeacherUI();
-  addLog(`💰 ${CLS[cls].name} received +$${amount} gold`);
+  addLog(`💰 ${CLS[cls].name} ${amount>=0?'received +':'lost '}$${Math.abs(amount)} gold`);
+}
+
+function manualGold(cls){
+  const el=document.getElementById('gold-manual-'+cls);
+  if(!el) return;
+  const val=parseInt(el.value);
+  if(isNaN(val)||val===0){ el.value=''; return; }
+  addGold(cls, val);
+  el.value='';
 }
 
 // ─── EXPORT / IMPORT / RESET ───
@@ -991,7 +1005,6 @@ function goTeacher(){
   initMap().then(()=>{
     renderTeacherUI();
     startBlockadeTicker();
-    loadBCBInbox();
   });
 }
 
@@ -1347,88 +1360,7 @@ async function publishToFirebase(){
   }
 }
 
-// ── BCB RANGER INBOX ──
-let _bcbDeployed = new Set(JSON.parse(localStorage.getItem('twc_bcb_deployed')||'[]'));
 
-function saveBCBDeployed(){
-  localStorage.setItem('twc_bcb_deployed', JSON.stringify([..._bcbDeployed]));
-}
-
-async function loadBCBInbox(){
-  const el = document.getElementById('bcb-inbox-list');
-  if(!el) return;
-  el.innerHTML = '<div style="font-size:.75em;color:#555;padding:4px">↻ Loading...</div>';
-  try {
-    const r = await fetch(FB_URL+'/bcb_rangers.json?t='+Date.now());
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const raw = await r.json();
-    renderBCBInbox(raw||{});
-    updateBCBBadge(raw||{});
-  } catch(e){
-    el.innerHTML = '<div style="font-size:.72em;color:#cc2200;padding:4px">⚠️ '+e.message+'</div>';
-  }
-}
-
-function renderBCBInbox(raw){
-  const el = document.getElementById('bcb-inbox-list');
-  if(!el) return;
-  let all = [];
-  Object.keys(raw).forEach(period=>{
-    const pd = raw[period];
-    if(!pd||typeof pd!=='object') return;
-    Object.keys(pd).forEach(key=>{
-      const e = pd[key];
-      if(e&&e.name) all.push({...e, _period:period, _key:key});
-    });
-  });
-  all.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
-  if(!all.length){ el.innerHTML='<div style="font-size:.75em;color:#555;padding:4px">No rangers submitted yet.</div>'; return; }
-  let html='';
-  all.forEach(e=>{
-    const key = e._period+'_'+e._key;
-    const dep = _bcbDeployed.has(key);
-    const ts  = e.timestamp ? new Date(e.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
-    const pLabel = e._period||'?';
-    html += `<div style="display:flex;align-items:center;gap:6px;padding:5px 4px;border-bottom:1px solid #1a2a1a;opacity:${dep?.45:1}">
-      <span style="font-size:1.2em">🪖</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:.8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.name||'Unknown'}</div>
-        <div style="font-size:.68em;color:#888">${pLabel.toUpperCase()} HOUR · ${ts}</div>
-      </div>
-      <button class="retro-btn sm" style="flex-shrink:0;${dep?'opacity:.3':''}"
-        ${dep?'disabled':''} onclick="deployBCBRanger('${key}','${e._period}','${e.name||''}')">
-        ${dep?'✓ DONE':'DEPLOY'}
-      </button>
-    </div>`;
-  });
-  el.innerHTML = html;
-}
-
-function deployBCBRanger(key, period, name){
-  const mp = ['1st','2nd','5th','6th'].find(p=>period.startsWith(p)) ||
-             (period.startsWith('1')?'1st':period.startsWith('2')?'2nd':period.startsWith('5')?'5th':'6th');
-  _bcbDeployed.add(key);
-  saveBCBDeployed();
-  loadBCBInbox();
-  addLog('🪂 BCB Ranger "'+name+'" logged for '+CLS[mp].name+'!');
-  publishToFirebase();
-}
-
-function updateBCBBadge(raw){
-  let pending=0;
-  Object.keys(raw).forEach(period=>{
-    const pd=raw[period];
-    if(!pd||typeof pd!=='object')return;
-    Object.keys(pd).forEach(key=>{
-      if(!_bcbDeployed.has(period+'_'+key)) pending++;
-    });
-  });
-  const h2=document.querySelector('#bcb-panel h2');
-  if(h2){
-    const badge = pending>0 ? ` <span style="background:#cc2200;color:#fff;font-size:.7em;padding:1px 6px;border-radius:10px">${pending}</span>` : '';
-    h2.innerHTML = '🪂 BCB RANGER INBOX'+badge+' <button onclick="loadBCBInbox()" style="background:none;border:none;color:#ffd700;cursor:pointer;font-size:.9em;margin-left:6px" title="Refresh">↻</button>';
-  }
-}
 
 // ── STUDENT FIREBASE POLL (every 30s) ──
 let _studentPollIv = null;
