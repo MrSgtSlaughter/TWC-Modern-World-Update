@@ -99,9 +99,11 @@ body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hi
 .ctrl-label{font-size:.74em;color:#888;display:block;margin-bottom:2px}
 
 /* GOLD ROW */
-.gold-row{display:grid;grid-template-columns:44px auto 28px 28px 44px 52px 60px;align-items:center;gap:3px;margin:5px 0;padding:4px 0}
-.gold-amt{background:var(--bg);border:1px solid #ffd700;color:#ffd700;padding:3px 6px;text-align:center;font-weight:700;font-size:.82em;white-space:nowrap}
-.gold-manual{background:var(--bg);border:1px solid #ffd700;color:#ffd700;padding:3px 4px;font-family:var(--font);font-size:.76em;width:60px;text-align:center}
+.gold-row{display:flex;flex-direction:column;gap:4px;padding:6px 0;border-bottom:1px dashed #1a3a1a}
+.gold-row-top{display:flex;align-items:center;gap:8px}
+.gold-row-btns{display:flex;align-items:center;gap:4px}
+.gold-amt{background:var(--bg);border:1px solid #ffd700;color:#ffd700;padding:3px 10px;text-align:center;font-weight:700;font-size:.88em;min-width:72px}
+.gold-manual{background:var(--bg);border:1px solid #ffd700;color:#ffd700;padding:3px 6px;font-family:var(--font);font-size:.76em;width:72px;text-align:center}
 .gold-manual:focus{outline:1px solid var(--yellow)}
 .gold-pm{background:var(--bg);border:1px solid var(--green);color:var(--green);width:26px;height:26px;font-size:1.1em;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;padding:0}
 .gold-pm:hover{background:var(--yellow);color:var(--bg);border-color:var(--yellow)}
@@ -124,7 +126,28 @@ body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hi
   #t-sidebar{width:240px}
 }
 
-/* COUNTRY LIST MODAL */
+/* UNIT INVENTORY MANAGER */
+.inv-mgr-cls{margin-bottom:10px}
+.inv-mgr-cls-hdr{font-size:.78em;font-weight:700;padding:4px 6px;border-bottom:1px solid var(--border);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.inv-mgr-row{display:grid;grid-template-columns:22px 1fr auto;align-items:start;gap:4px;padding:4px 2px;border-bottom:1px dashed #1a3a1a;font-size:.75em}
+.inv-mgr-row:last-child{border-bottom:none}
+.inv-mgr-name{color:var(--yellow);font-weight:700;line-height:1.2}
+.inv-mgr-desc{font-size:.82em;color:#888;line-height:1.35;margin-top:1px;white-space:normal;word-break:break-word}
+.inv-mgr-ctrl{display:flex;align-items:center;gap:3px;flex-shrink:0;margin-top:1px}
+.inv-pm{background:var(--bg);border:1px solid var(--border);color:var(--green);width:22px;height:22px;font-size:1em;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0}
+.inv-pm:hover{background:var(--yellow);color:var(--bg);border-color:var(--yellow)}
+.inv-pm.minus{border-color:#ff6666;color:#ff6666}
+.inv-pm.minus:hover{background:#ff3333;color:#fff;border-color:#ff3333}
+.inv-qty{color:var(--yellow);font-weight:700;font-size:1em;min-width:22px;text-align:center}
+/* DEPLOY PANEL */
+.deploy-row{display:grid;grid-template-columns:28px 1fr auto;align-items:start;gap:6px;padding:7px 2px;border-bottom:1px dashed #1a3a1a}
+.deploy-row:last-child{border-bottom:none}
+.deploy-controls{display:flex;flex-direction:column;gap:3px}
+.deploy-select{background:var(--bg);border:1px solid var(--border);color:var(--green);padding:3px 5px;font-family:var(--font);font-size:.72em;width:100%}
+/* INV DISPLAY */
+.inv-cls-header{color:var(--yellow);font-weight:700;font-size:.8em;padding:5px 0 2px;border-bottom:1px solid var(--border);margin-top:6px}
+.inv-tag{background:var(--bg);border:1px solid #1a3a1a;padding:2px 7px;font-size:.72em;color:var(--green);display:inline-block;margin:2px}
+.inv-tag.infantry{border-color:#4488ff;color:#88aaff}
 #country-list-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);z-index:2000;display:none;align-items:center;justify-content:center}
 #country-list-modal.open{display:flex}
 .cl-box{background:var(--bg2);border:3px solid var(--yellow);padding:0;width:min(95vw,900px);max-height:90vh;display:flex;flex-direction:column;box-shadow:10px 10px 0 rgba(0,0,0,.7);font-family:var(--font)}
@@ -172,7 +195,20 @@ body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hi
 .faq-a.open{display:block}
 .faq-footer{padding:8px 14px;border-top:1px solid #1a2a1a;font-size:.68em;color:#555;flex-shrink:0;text-align:center}
 
-/* BACKGROUND VIDEO / MAP */
+/* STUDENT CUTSCENE OVERLAY */
+#s-cutscene{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.97);z-index:5000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+#s-cutscene.open{display:flex}
+#s-cutscene video{width:min(96vw,900px);max-height:78vh;border:3px solid var(--yellow);box-shadow:0 0 40px rgba(255,255,0,.3);object-fit:contain}
+#s-cutscene .sc-label{color:var(--yellow);font-family:var(--font);font-size:1.2em;font-weight:700;letter-spacing:3px;margin-bottom:4px}
+#s-cutscene .sc-skip{color:var(--yellow);font-family:var(--font);font-size:.85em;cursor:pointer;border:1px dashed var(--yellow);padding:6px 20px;margin-top:4px;transition:all .2s}
+#s-cutscene .sc-skip:hover{background:var(--yellow);color:var(--bg)}
+
+/* UNIT VIDEO BROWSER (student) */
+.unit-vid-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
+.unit-vid-btn{background:var(--bg);border:2px solid #1a3a2a;color:var(--green);padding:8px 6px;font-family:var(--font);font-size:.72em;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.unit-vid-btn:hover{border-color:var(--yellow);color:var(--yellow);background:#0a1a0a}
+.unit-vid-btn .uv-emoji{font-size:1.6em;line-height:1}
+.unit-vid-btn .uv-label{font-size:.85em;color:#888}
 #map-wrap {
   position: relative;
   overflow: hidden;
@@ -244,12 +280,14 @@ body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hi
     <p id="s-subhead">Period X · COLOR EMPIRE</p>
   </div>
   <div class="s-layout">
-    <!-- LEFT: Stats + Government -->
+    <!-- LEFT: Stats + Government + Inventory -->
     <div class="retro-panel">
       <h2>📊 EMPIRE STATUS</h2>
       <div id="s-stats"></div>
       <h2 style="margin-top:14px">🏛️ GOVERNMENT</h2>
       <div id="s-govt" style="font-size:.9em;padding:4px 0 8px"></div>
+      <h2 style="margin-top:6px">🎖️ INVENTORY</h2>
+      <div id="s-inventory" style="font-size:.82em"></div>
     </div>
     <!-- RIGHT: Leaderboard + Mini Map + Log -->
     <div class="retro-panel">
@@ -264,6 +302,7 @@ body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hi
       <h2 style="margin-top:14px">📋 BATTLE LOG</h2>
       <div id="s-log" style="font-size:.78em;max-height:200px;overflow-y:auto;background:var(--bg);padding:8px;border:1px dashed var(--border)"></div>
       <button class="retro-btn" style="margin-top:6px;width:100%;background:#1a3a1a;color:var(--green);border-color:var(--green)" onclick="openCountryList()">🌍 VIEW ALL COUNTRIES &amp; CODES</button>
+      <button class="retro-btn" style="margin-top:6px;width:100%;background:#0a1a2a;color:#00ccff;border-color:#00ccff" onclick="openUnitVideos()">📽️ WATCH UNIT VIDEOS</button>
       <button class="retro-btn" style="margin-top:6px;width:100%;background:#1a0a2a;color:#c084fc;border-color:#c084fc" onclick="openFAQ()">❓ GAME HELP &amp; FAQ</button>
       <button class="retro-btn secondary" style="margin-top:6px;width:100%" onclick="goLogin()">← BACK</button>
     </div>
@@ -331,6 +370,45 @@ body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hi
         <h2>💰 GOLD AWARDS</h2>
         <div id="gold-rows"></div>
       </div>
+
+      <!-- UNIT INVENTORY MANAGER -->
+      <div class="retro-panel">
+        <h2>🎖️ UNIT INVENTORY</h2>
+        <div id="unit-shop"></div>
+      </div>
+
+      <!-- DEPLOY WEAPONS -->
+      <div class="retro-panel">
+        <h2>⚔️ DEPLOY UNITS</h2>
+        <div id="deploy-panel"></div>
+      </div>
+
+      <!-- TURN TRACKER -->
+      <div class="retro-panel">
+        <h2>⏱️ DAILY TURN TRACKER <span style="font-size:.7em;color:#888;font-weight:400">(3 per class / day — resets at midnight)</span></h2>
+        <div id="turn-tracker"></div>
+      </div>
+
+      <!-- DRAFT INFANTRY REFERENCE -->
+      <div class="retro-panel">
+        <h2>🪖 INFANTRY DRAFT — d20 CHART</h2>
+        <div style="font-size:.72em;color:#888;margin-bottom:6px;line-height:1.5">
+          Declare draft → costs 1 turn → General rolls d20 → use +/− in inventory to set result.
+          Monarchy &amp; Oligarchy <strong style="color:#ff6666">cannot</strong> draft.
+          Infantry burn after defending one turn.
+        </div>
+        <div style="background:var(--bg);border:1px solid #1a3a1a;padding:7px 10px;font-size:.72em;line-height:2">
+          <span style="color:#ff4444">🎲 1</span> = FAIL — turn lost, 0 infantry<br>
+          <span style="color:#ffaa44">🎲 2–4</span> = 1 infantry<br>
+          <span style="color:#ffaa44">🎲 5–8</span> = 2 infantry<br>
+          <span style="color:#ffff44">🎲 9–13</span> = 3 infantry &nbsp;<span style="color:#555">(most likely)</span><br>
+          <span style="color:#88ff44">🎲 14–17</span> = 4 infantry<br>
+          <span style="color:#88ff44">🎲 18–19</span> = 5 infantry<br>
+          <span style="color:#00ffff">🎲 20</span> = 6 infantry + <strong style="color:#00ffff">FREE TURN 🎉</strong>
+        </div>
+      </div>
+
+
 
       <!-- FAQ -->
       <div class="retro-panel">
@@ -417,14 +495,104 @@ const CLS = {
 };
 
 const GOVTS = {
-  'Democracy':       { icon:'🗳️', bonus:'defense_plus1',  desc:'+1 to all defense rolls' },
-  'Republic':        { icon:'📜', bonus:'extra_claim',     desc:'Claim 1 EXTRA territory/turn' },
-  'Monarchy':        { icon:'👑', bonus:'divine_right',    desc:'Immune to Nuke & Cyber Attack' },
-  'Dictatorship':    { icon:'✊', bonus:'cheap_rangers',   desc:'Airborne Rangers cost $50' },
-  'Authoritarianism':{ icon:'🔒', bonus:'long_blockade',   desc:'Blockades last 2 weeks' },
-  'Totalitarianism': { icon:'⚡', bonus:'total_control',   desc:'+3 attack, -1 defense' },
-  'Oligarchy':       { icon:'💰', bonus:'gold_bonus',      desc:'+$500 bonus gold on set' },
-  'Theocracy':       { icon:'✝️', bonus:'cyber_immune',    desc:'Immune to Cyber Attack' },
+  'Democracy': {
+    icon:'🗳️',
+    benefit:'+3 to all defense rolls',
+    consequence:'If attacker total (roll + modifiers) exceeds 18, you lose ALL inventory',
+    desc:'+3 defense · Inventory wiped if breached by 18+'
+  },
+  'Republic': {
+    icon:'📜',
+    benefit:'Claim 4 territories per turn (all others get 3)',
+    consequence:'Every decision requires a full class vote before acting',
+    desc:'4 claims/turn · Class votes on every decision'
+  },
+  'Monarchy': {
+    icon:'👑',
+    benefit:'Immune to all nukes (Divine Right)',
+    consequence:'Cannot own or draft infantry — ever',
+    desc:'Immune to nukes · No infantry allowed'
+  },
+  'Dictatorship': {
+    icon:'✊',
+    benefit:'+2 to all attack rolls · Drones cost $50 and destroy 1 enemy inventory item',
+    consequence:'Lose 1 random territory on any failed attack',
+    desc:'+2 attack, Drones $50 · Lose territory on failed attacks'
+  },
+  'Authoritarianism': {
+    icon:'🔒',
+    benefit:'Add a d10 bonus to EVERY roll (attack and defense)',
+    consequence:'Cannot own ANY inventory — units seized by the state',
+    desc:'+d10 all rolls · Zero inventory ever'
+  },
+  'Totalitarianism': {
+    icon:'⚡',
+    benefit:'+3 to all attack rolls',
+    consequence:'-2 to all defense rolls',
+    desc:'+3 attack · -2 defense'
+  },
+  'Oligarchy': {
+    icon:'💰',
+    benefit:'+$200 automatically whenever ANY class receives gold',
+    consequence:'Cannot own or draft infantry — ever',
+    desc:'+$200 trickle-down on any gold award · No infantry'
+  },
+  'Theocracy': {
+    icon:'✝️',
+    benefit:'Infantry draft always yields minimum 3 soldiers · Immune to Apache Helicopter',
+    consequence:'Cannot attack on Fridays',
+    desc:'Draft min 3 · Apache immune · No attacks on Fridays'
+  },
+};
+
+// ── UNIT ROSTER ──
+const UNITS = {
+  'DRONE': {
+    name:'Drone', emoji:'🛸', cost:150,
+    effect:'Destroy 1 specific inventory item from any enemy empire. No success roll — guaranteed hit. Dictatorship price: $50.',
+    stack:false, max:1, special:'drone',
+    desc:'Precision strike — wipes one enemy unit. Dictatorships pay $50.'
+  },
+  'DRAFT_INFANTRY': {
+    name:'Draft Infantry', emoji:'🪖', cost:0,
+    effect:'+1 defense roll per soldier. ALL soldiers consumed after the turn they defend. Roll d20 to draft — see chart below.',
+    stack:true, max:6, special:'draft',
+    desc:'FREE. Roll d20: 1=fail, 2-4=1, 5-8=2, 9-13=3, 14-17=4, 18-19=5, 20=6+free turn. Monarchy & Oligarchy cannot draft.'
+  },
+  'APACHE': {
+    name:'Apache Helicopter', emoji:'🚁', cost:550,
+    effect:'Capture 1 specific enemy territory that borders YOUR land — no attack roll needed. 65% success.',
+    stack:false, max:1, special:'apache',
+    desc:'Most powerful territory grabber. Must border your land. Theocracy is immune.'
+  },
+  'STEALTH_BOMBER': {
+    name:'Stealth Bomber', emoji:'🛩️', cost:650,
+    effect:'Force enemy to lose 2 random territories — both go unclaimed. 60% success.',
+    stack:false, max:1, special:'stealth_bomber',
+    desc:'Strips 2 territories at once.'
+  },
+  'NUCLEAR_SUB': {
+    name:'Nuclear Submarine', emoji:'⚓', cost:900,
+    effect:'Attack ANY territory on the map AND roll attack dice twice, take the better result. 65% success.',
+    stack:false, max:1, special:'nuclear_sub',
+    desc:'Combines Aircraft Carrier + Submarine.'
+  },
+  'TACTICAL_NUKE': {
+    name:'Tactical ICBM', emoji:'🎯', cost:1500,
+    effect:'Permanently DESTROYS 1 specific territory — gone forever. No inventory wipe. 50% success.',
+    stack:false, max:1, special:'tactical_nuke',
+    desc:'Surgical nuke. Monarchy immune.'
+  },
+};
+
+// ── UNIT VIDEO MAP (exact GitHub Pages filenames) ──
+const UNIT_VIDEOS = {
+  'DRONE':          { file:'drones.mp4',    label:'🛸 Drone in Action' },
+  'DRAFT_INFANTRY': { file:'infantry.mp4',  label:'🪖 Draft Infantry' },
+  'APACHE':         { file:'helicopter.mp4',label:'🚁 Apache Helicopter' },
+  'STEALTH_BOMBER': { file:'stealth.mp4',   label:'🛩️ Stealth Bomber' },
+  'NUCLEAR_SUB':    { file:'sub.mp4',        label:'⚓ Nuclear Submarine' },
+  'TACTICAL_NUKE':  { file:'icbmnuke.mp4',  label:'🎯 Tactical ICBM' },
 };
 
 // 5 Themes: [Location, Place, H-E Interaction, Movement, Region]
@@ -523,7 +691,7 @@ function cname(iso){ return NAMES[iso]||iso; }
 // ═══════════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════════
-const SK = { OWN:'TWC2_OWN', GOLD:'TWC2_GOLD', GOVT:'TWC2_GOVT', BLOK:'TWC2_BLOK', SKIP:'TWC2_SKIP', LOG:'TWC2_LOG', NUKED:'TWC2_NUKED' };
+const SK = { OWN:'TWC2_OWN', GOLD:'TWC2_GOLD', GOVT:'TWC2_GOVT', BLOK:'TWC2_BLOK', SKIP:'TWC2_SKIP', LOG:'TWC2_LOG', NUKED:'TWC2_NUKED', INV:'TWC2_INV', TURNS:'TWC2_TURNS' };
 
 function loadState(){
   const s={};
@@ -534,7 +702,16 @@ function loadState(){
   s.skip  = JSON.parse(localStorage.getItem(SK.SKIP)||'{"1st":0,"2nd":0,"5th":0,"6th":0}');
   s.nuked = JSON.parse(localStorage.getItem(SK.NUKED)||'[]');
   s.log   = JSON.parse(localStorage.getItem(SK.LOG) ||'[]');
-  for(const c of ['1st','2nd','5th','6th']){ if(!s.gold[c])s.gold[c]=0; if(!s.skip[c])s.skip[c]=0; }
+  s.inv   = JSON.parse(localStorage.getItem(SK.INV)  ||'{"1st":{},"2nd":{},"5th":{},"6th":{}}');
+  // Turns: {date:'YYYY-MM-DD', used:{1st:0,2nd:0,5th:0,6th:0}}
+  const savedTurns = JSON.parse(localStorage.getItem(SK.TURNS)||'null');
+  const today = new Date().toISOString().slice(0,10);
+  if(savedTurns && savedTurns.date===today){
+    s.turns = savedTurns;
+  } else {
+    s.turns = {date:today, used:{'1st':0,'2nd':0,'5th':0,'6th':0}};
+  }
+  for(const c of ['1st','2nd','5th','6th']){ if(!s.gold[c])s.gold[c]=0; if(!s.skip[c])s.skip[c]=0; if(!s.inv[c])s.inv[c]={}; if(s.turns.used[c]===undefined)s.turns.used[c]=0; }
   return s;
 }
 function saveState(){
@@ -545,6 +722,8 @@ function saveState(){
   localStorage.setItem(SK.SKIP,  JSON.stringify(S.skip));
   localStorage.setItem(SK.NUKED, JSON.stringify(S.nuked));
   localStorage.setItem(SK.LOG,   JSON.stringify(S.log.slice(-50)));
+  localStorage.setItem(SK.INV,   JSON.stringify(S.inv));
+  localStorage.setItem(SK.TURNS, JSON.stringify(S.turns));
 }
 
 let S = loadState();
@@ -629,8 +808,9 @@ function mapClick(event,d){
 // LEADERBOARD RENDER
 // ═══════════════════════════════════════════════════════════════════
 function renderLB(){
+  const maxTurns = (cls) => S.govt[cls]==='Republic' ? 4 : 3;
   const rows=['1st','2nd','5th','6th']
-    .map(c=>({c,s:score(c),t:terrCount(c)}))
+    .map(c=>({c,s:score(c),t:terrCount(c),turnsLeft:Math.max(0,maxTurns(c)-(S.turns?S.turns.used[c]||0:0))}))
     .sort((a,b)=>b.s-a.s);
   const emojis=['🥇','🥈','🥉','4️⃣'];
 
@@ -643,7 +823,7 @@ function renderLB(){
       <div class="lb-dot" style="background:${cl.color};width:14px;height:14px;border-radius:50%;flex-shrink:0"></div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;color:${cl.color};white-space:nowrap">${cl.name}</div>
-        <div style="font-size:.68em;color:#888;white-space:nowrap">${r.t} terr.${sk>0?` <span class="skip-badge">⏸${sk}</span>`:''} ${g?`· ${GOVTS[g].icon}`:'·❓'}</div>
+        <div style="font-size:.68em;color:#888;white-space:nowrap">${r.t} terr.${sk>0?` <span class="skip-badge">⏸${sk}</span>`:''} ${g?`· ${GOVTS[g].icon}`:'·❓'} · <span style="color:${r.turnsLeft>0?'#88ff44':'#ff4444'}">${r.turnsLeft} turn${r.turnsLeft!==1?'s':''} left</span></div>
       </div>
       <div style="text-align:right;flex-shrink:0;font-size:.78em">
         <div style="color:#ffd700;font-weight:700">$${(S.gold[r.c]||0).toLocaleString()}</div>
@@ -692,11 +872,50 @@ function renderStudentView(period){
 
   const govt=S.govt[cls];
   document.getElementById('s-govt').innerHTML=govt
-    ?`<span class="govt-badge" style="font-size:.9em">${GOVTS[govt].icon} ${govt}</span><br><span style="color:#aaa;font-size:.8em">${GOVTS[govt].desc}</span>`
+    ?`<div style="margin-bottom:4px"><span class="govt-badge" style="font-size:.9em">${GOVTS[govt].icon} ${govt}</span></div>
+      <div style="background:var(--bg);border:1px solid #1a3a1a;padding:5px 8px;font-size:.78em;line-height:1.7">
+        <div style="color:#88ff44">✅ ${GOVTS[govt].benefit}</div>
+        <div style="color:#ff8844">⚠️ ${GOVTS[govt].consequence}</div>
+      </div>`
     :'<span style="color:#555">Not yet assigned</span>';
 
   const logEl=document.getElementById('s-log');
   if(logEl) logEl.innerHTML=S.log.map(l=>`<div style="margin-bottom:3px;border-bottom:1px dashed #1a2a1a;padding-bottom:2px">${l}</div>`).join('')||'<span style="color:#555">No battles yet</span>';
+
+  // Student inventory
+  const invEl=document.getElementById('s-inventory');
+  if(invEl){
+    const inv=S.inv[cls]||{};
+    const infantry=inv['DRAFT_INFANTRY']||0;
+    let html='<table style="width:100%;border-collapse:collapse">';
+    let any=false;
+    if(infantry>0){
+      any=true;
+      html+=`<tr>
+        <td style="padding:4px 6px;border-bottom:1px dashed #1a3a1a">🪖 Draft Infantry</td>
+        <td style="padding:4px 6px;border-bottom:1px dashed #1a3a1a;color:#88aaff;font-weight:700">×${infantry} <span style="color:#555;font-size:.75em">(+${infantry} def)</span></td>
+        <td style="padding:4px 6px;border-bottom:1px dashed #1a3a1a;text-align:right">
+          <button onclick="playUnitVideo('DRAFT_INFANTRY')" style="background:#001a00;border:1px solid #00cc44;color:#00cc44;font-family:var(--font);font-size:.65em;padding:2px 7px;cursor:pointer">▶ WATCH</button>
+        </td>
+      </tr>`;
+    }
+    for(const [k,u] of Object.entries(UNITS)){
+      if(k==='DRAFT_INFANTRY') continue;
+      const qty=inv[k]||0;
+      if(qty>0){
+        any=true;
+        html+=`<tr>
+          <td style="padding:4px 6px;border-bottom:1px dashed #1a3a1a">${u.emoji} ${u.name}</td>
+          <td style="padding:4px 6px;border-bottom:1px dashed #1a3a1a;color:var(--yellow);font-weight:700">×${qty}</td>
+          <td style="padding:4px 6px;border-bottom:1px dashed #1a3a1a;text-align:right">
+            <button onclick="playUnitVideo('${k}')" style="background:#001a00;border:1px solid #00cc44;color:#00cc44;font-family:var(--font);font-size:.65em;padding:2px 7px;cursor:pointer">▶ WATCH</button>
+          </td>
+        </tr>`;
+      }
+    }
+    html+='</table>';
+    invEl.innerHTML=any?html:'<span style="color:#555;font-size:.85em">No units in inventory — use the 📽️ button below to preview all unit videos!</span>';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -707,39 +926,48 @@ function renderTeacherUI(){
   let gh='';
   for(const c of ['1st','2nd','5th','6th']){
     const cl=CLS[c];
-    gh+=`<div style="margin-bottom:6px">
-      <div style="font-size:.8em;font-weight:700;color:${cl.color};margin-bottom:2px">${cl.emoji} ${cl.name}</div>
+    const g=S.govt[c];
+    gh+=`<div style="margin-bottom:8px">
+      <div style="font-size:.8em;font-weight:700;color:${cl.color};margin-bottom:3px">${cl.emoji} ${cl.name}</div>
       <div class="ctrl-row">
         <select class="ctrl-select" style="flex:1" id="govt-${c}" onchange="setGovt('${c}',this.value)">
           <option value="">— Not Set —</option>
-          ${Object.entries(GOVTS).map(([k,v])=>`<option value="${k}" ${S.govt[c]===k?'selected':''}>${v.icon} ${k}</option>`).join('')}
+          ${Object.entries(GOVTS).map(([k,v])=>`<option value="${k}" ${g===k?'selected':''}>${v.icon} ${k}</option>`).join('')}
         </select>
       </div>
-      ${S.govt[c]?`<div style="font-size:.68em;color:#888;margin-top:2px">${GOVTS[S.govt[c]].desc}</div>`:''}
+      ${g?`<div style="margin-top:4px;background:var(--bg);border:1px solid #1a3a1a;padding:5px 8px;font-size:.68em;line-height:1.6">
+        <div style="color:#88ff44">✅ ${GOVTS[g].benefit}</div>
+        <div style="color:#ff8844">⚠️ ${GOVTS[g].consequence}</div>
+      </div>`:''}
     </div>`;
   }
   document.getElementById('govt-rows').innerHTML=gh;
 
-  // Gold
+  // Gold — clean two-row layout
   let gg='';
   for(const c of ['1st','2nd','5th','6th']){
     const cl=CLS[c];
     gg+=`<div class="gold-row">
-      <span style="color:${cl.color};font-weight:700;font-size:.8em">${cl.emoji} ${c}</span>
-      <span class="gold-amt">$${(S.gold[c]||0).toLocaleString()}</span>
-      <button class="gold-pm" onclick="addGold('${c}',50)" title="+50">+</button>
-      <button class="gold-pm" style="border-color:#ff6666;color:#ff6666" onclick="addGold('${c}',-50)" title="-50">−</button>
-      <button class="retro-btn sm" onclick="addGold('${c}',100)">+100</button>
-      <button class="retro-btn sm" onclick="addGold('${c}',200)">+200</button>
-      <input class="gold-manual" id="gold-manual-${c}" type="number" placeholder="±amt"
-        onkeydown="if(event.key==='Enter'){manualGold('${c}');event.preventDefault()}"
-        title="Type amount, press Enter">
+      <div class="gold-row-top">
+        <span style="color:${cl.color};font-weight:700;font-size:.82em;min-width:36px">${cl.emoji} ${c}</span>
+        <span class="gold-amt">$${(S.gold[c]||0).toLocaleString()}</span>
+        <button class="gold-pm" onclick="addGold('${c}',50)" title="+$50">+</button>
+        <button class="gold-pm" style="border-color:#ff6666;color:#ff6666" onclick="addGold('${c}',-50)" title="-$50">−</button>
+      </div>
+      <div class="gold-row-btns">
+        <input class="gold-manual" id="gold-manual-${c}" type="number" placeholder="±custom"
+          onkeydown="if(event.key==='Enter'){manualGold('${c}');event.preventDefault()}"
+          title="Type any amount (+ or -), press Enter">
+        <span style="font-size:.65em;color:#555">press Enter</span>
+      </div>
     </div>`;
   }
-  gg+=`<div style="font-size:.68em;color:#555;margin-top:4px;padding:0 2px">± buttons = ±$50 &nbsp;·&nbsp; type amount + Enter for custom</div>`;
   document.getElementById('gold-rows').innerHTML=gg;
 
   renderLB();
+  renderTurnTracker();
+  renderUnitShop();
+  renderDeployPanel();
   const nukedCount=(S.nuked||[]).length;
   document.getElementById('t-date').textContent=new Date().toLocaleDateString()+(nukedCount>0?` · ☢️ ${nukedCount} nuked`:'');
 }
@@ -762,17 +990,21 @@ function claimTerritory(){
 
 function setGovt(cls, govt){
   S.govt[cls]=govt||null;
-  if(govt==='Oligarchy'&&!S.gold[cls+'_olg']){
-    S.gold[cls]=(S.gold[cls]||0)+500;
-    S.gold[cls+'_olg']=true;
-    addLog(`💰 ${CLS[cls].name} selected Oligarchy — +$500 bonus!`);
-  }
   saveState(); renderTeacherUI();
   addLog(`🏛️ ${CLS[cls].name} government → ${govt||'none'}`);
 }
 
 function addGold(cls, amount){
   S.gold[cls]=Math.max(0,(S.gold[cls]||0)+amount);
+  // Oligarchy trickle-down: any OTHER class with Oligarchy gets +$200 when gold is awarded
+  if(amount>0){
+    for(const c of ['1st','2nd','5th','6th']){
+      if(c!==cls && S.govt[c]==='Oligarchy'){
+        S.gold[c]=(S.gold[c]||0)+200;
+        addLog(`💰 ${CLS[c].name} (Oligarchy) trickle-down: +$200`);
+      }
+    }
+  }
   saveState(); renderTeacherUI();
   addLog(`💰 ${CLS[cls].name} ${amount>=0?'received +':'lost '}$${Math.abs(amount)} gold`);
 }
@@ -786,9 +1018,284 @@ function manualGold(cls){
   el.value='';
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// UNIT SYSTEM
+// ═══════════════════════════════════════════════════════════════════
+
+function getInv(cls){ return S.inv[cls]||(S.inv[cls]={}); }
+function getQty(cls,uk){ return getInv(cls)[uk]||0; }
+function setQty(cls,uk,n){ getInv(cls)[uk]=Math.max(0,n); saveState(); }
+
+// ── UNIT SHOP RENDER ──
+// ── TURN TRACKER ──
+function renderTurnTracker(){
+  const el=document.getElementById('turn-tracker'); if(!el) return;
+  const today=new Date().toISOString().slice(0,10);
+  if(!S.turns||S.turns.date!==today) S.turns={date:today,used:{'1st':0,'2nd':0,'5th':0,'6th':0}};
+  let html='';
+  for(const c of ['1st','2nd','5th','6th']){
+    const cl=CLS[c];
+    const max=S.govt[c]==='Republic'?4:3;
+    const used=S.turns.used[c]||0;
+    const left=Math.max(0,max-used);
+    const pips=Array.from({length:max},(_,i)=>
+      `<span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:${i<used?'#333':cl.color};border:2px solid ${cl.color};margin:0 2px;vertical-align:middle"></span>`
+    ).join('');
+    html+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed #1a3a1a">
+      <span style="color:${cl.color};font-weight:700;font-size:.8em;min-width:36px">${cl.emoji} ${c}</span>
+      <span>${pips}</span>
+      <span style="font-size:.72em;color:${left>0?'#88ff44':'#ff4444'};font-weight:700;margin-left:2px">${left} left</span>
+      <div style="margin-left:auto;display:flex;gap:3px">
+        <button class="inv-pm" onclick="useTurn('${c}')" title="Use 1 turn" ${left<=0?'disabled style="opacity:.3"':''}>−</button>
+        <button class="inv-pm" onclick="restoreTurn('${c}')" title="Restore 1 turn">+</button>
+      </div>
+    </div>`;
+  }
+  html+=`<div style="display:flex;justify-content:flex-end;margin-top:6px">
+    <button class="retro-btn sm danger" onclick="resetTurns()">↺ RESET ALL TURNS</button>
+  </div>`;
+  el.innerHTML=html;
+}
+
+function useTurn(cls){
+  const max=S.govt[cls]==='Republic'?4:3;
+  if((S.turns.used[cls]||0)>=max){ alert(`${CLS[cls].name} has no turns left today!`); return; }
+  S.turns.used[cls]=(S.turns.used[cls]||0)+1;
+  saveState(); renderTeacherUI();
+  addLog(`⏱️ ${CLS[cls].name} used 1 turn (${S.turns.used[cls]}/${max} today)`);
+}
+
+function restoreTurn(cls){
+  if((S.turns.used[cls]||0)<=0) return;
+  S.turns.used[cls]=(S.turns.used[cls]||0)-1;
+  saveState(); renderTeacherUI();
+  addLog(`⏱️ ${CLS[cls].name} turn restored (${S.turns.used[cls]} used today)`);
+}
+
+function resetTurns(){
+  if(!confirm('Reset ALL turn counts to 0?')) return;
+  const today=new Date().toISOString().slice(0,10);
+  S.turns={date:today,used:{'1st':0,'2nd':0,'5th':0,'6th':0}};
+  saveState(); renderTeacherUI();
+  addLog('⏱️ All turn counts reset by teacher.');
+}
+
+// ── UNIT INVENTORY MANAGER ──
+function renderUnitShop(){
+  const el=document.getElementById('unit-shop'); if(!el) return;
+  let html='';
+  for(const c of ['1st','2nd','5th','6th']){
+    const cl=CLS[c];
+    const isAuthoritarian=S.govt[c]==='Authoritarianism';
+    const noInfantry=['Monarchy','Oligarchy'].includes(S.govt[c]);
+    html+=`<div class="inv-mgr-cls">
+      <div class="inv-mgr-cls-hdr">
+        <span style="width:10px;height:10px;border-radius:50%;background:${cl.color};display:inline-block;flex-shrink:0"></span>
+        <span style="color:${cl.color}">${cl.name}</span>
+        ${isAuthoritarian?'<span style="color:#ff8844;font-size:.7em;margin-left:4px">🔒 NO INVENTORY</span>':''}
+      </div>`;
+    // Infantry first
+    const infQty=getQty(c,'DRAFT_INFANTRY');
+    const infLocked=isAuthoritarian||noInfantry;
+    html+=`<div class="inv-mgr-row">
+      <span style="font-size:1.2em;line-height:1">🪖</span>
+      <div>
+        <div class="inv-mgr-name">Draft Infantry ${noInfantry?'<span style="color:#ff6666;font-size:.75em">— govt locked</span>':''}</div>
+        <div class="inv-mgr-desc">+1 def/soldier · all burn after defending · d20 draft</div>
+      </div>
+      <div class="inv-mgr-ctrl">
+        <button class="inv-pm minus" onclick="adjustInv('${c}','DRAFT_INFANTRY',-1)" ${infLocked?'disabled style="opacity:.25"':''}>−</button>
+        <span class="inv-qty">${infQty}</span>
+        <button class="inv-pm" onclick="adjustInv('${c}','DRAFT_INFANTRY',1)" ${infLocked?'disabled style="opacity:.25"':''}>+</button>
+      </div>
+    </div>`;
+    // All other units
+    for(const [uk,u] of Object.entries(UNITS)){
+      if(uk==='DRAFT_INFANTRY') continue;
+      const qty=getQty(c,uk);
+      const locked=isAuthoritarian;
+      const droneCost=uk==='DRONE'&&S.govt[c]==='Dictatorship'?'$50':'';
+      html+=`<div class="inv-mgr-row">
+        <span style="font-size:1.2em;line-height:1">${u.emoji}</span>
+        <div>
+          <div class="inv-mgr-name">${u.name} ${droneCost?`<span style="color:#ffd700;font-size:.75em">${droneCost}</span>`:''}</div>
+          <div class="inv-mgr-desc">${u.effect}</div>
+        </div>
+        <div class="inv-mgr-ctrl">
+          <button class="inv-pm minus" onclick="adjustInv('${c}','${uk}',-1)" ${locked?'disabled style="opacity:.25"':''}>−</button>
+          <span class="inv-qty">${qty}</span>
+          <button class="inv-pm" onclick="adjustInv('${c}','${uk}',1)" ${locked?'disabled style="opacity:.25"':''}>+</button>
+        </div>
+      </div>`;
+    }
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+
+function adjustInv(cls, uk, delta){
+  const u=UNITS[uk]; if(!u) return;
+  // Government locks
+  if(S.govt[cls]==='Authoritarianism'){
+    alert(`🔒 ${CLS[cls].name} is Authoritarian — units are seized by the state. No inventory allowed.`); return;
+  }
+  if(uk==='DRAFT_INFANTRY' && (S.govt[cls]==='Monarchy'||S.govt[cls]==='Oligarchy')){
+    alert(`${CLS[cls].name}'s ${S.govt[cls]} cannot draft infantry.`); return;
+  }
+  const cur=getQty(cls,uk);
+  const next=Math.max(0, cur+delta);
+  if(u.max && delta>0 && next>u.max){ alert(`Max ${u.max} ${u.name} for ${CLS[cls].name}.`); return; }
+  setQty(cls,uk,next);
+  renderTeacherUI();
+  addLog(`${u.emoji} ${CLS[cls].name} ${u.name} → ${next}`);
+}
+
+// ── DEPLOY PANEL RENDER ──
+function renderDeployPanel(){
+  const el=document.getElementById('deploy-panel'); if(!el) return;
+  const deployable=['DRONE','APACHE','STEALTH_BOMBER','NUCLEAR_SUB','TACTICAL_NUKE'];
+  const clsOpts=['1st','2nd','5th','6th'].map(c=>`<option value="${c}">${CLS[c].emoji} ${CLS[c].name}</option>`).join('');
+  let html='';
+  for(const uk of deployable){
+    const u=UNITS[uk];
+    const needsTarget=['STEALTH_BOMBER','NUCLEAR_SUB'].includes(uk);
+    const needsIso=['APACHE','TACTICAL_NUKE'].includes(uk);
+    const needsDroneTarget=uk==='DRONE';
+    html+=`<div class="deploy-row">
+      <span style="font-size:1.4em">${u.emoji}</span>
+      <div>
+        <div style="font-size:.78em;font-weight:700;color:var(--yellow)">${u.name}</div>
+        <div style="font-size:.66em;color:#888;margin:2px 0">${u.effect.substring(0,70)}…</div>
+        <div class="deploy-controls">
+          <select class="deploy-select" id="dep-cls-${uk}">${clsOpts}</select>
+          ${needsTarget||needsDroneTarget?`<select class="deploy-select" id="dep-tgt-${uk}">${clsOpts}</select>`:''}
+          ${needsIso?`<input class="ctrl-input" id="dep-iso-${uk}" placeholder="Target ISO" maxlength="3" style="text-transform:uppercase;width:100%">`:``}
+          ${needsDroneTarget?`<select class="deploy-select" id="dep-unit-${uk}">${Object.entries(UNITS).filter(([k])=>k!=='DRAFT_INFANTRY').map(([k,v])=>`<option value="${k}">${v.emoji} ${v.name}</option>`).join('')}<option value="DRAFT_INFANTRY">🪖 Draft Infantry</option></select>`:``}
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:.68em;color:#ffd700;margin-bottom:2px">1-shot</div>
+        <button class="retro-btn sm danger" onclick="deployUnit('${uk}')">⚡ USE</button>
+      </div>
+    </div>`;
+  }
+  el.innerHTML=html||'<span style="color:#555;font-size:.8em">No deployable units</span>';
+}
+
+function deployUnit(uk){
+  const u=UNITS[uk]; if(!u) return;
+  const clsEl=document.getElementById('dep-cls-'+uk);
+  const tgtEl=document.getElementById('dep-tgt-'+uk);
+  const isoEl=document.getElementById('dep-iso-'+uk);
+  const cls=clsEl?clsEl.value:'1st';
+  const target=tgtEl?tgtEl.value:'2nd';
+  const iso=isoEl?isoEl.value.trim().toUpperCase():'';
+
+  const qty=getQty(cls,uk);
+  if(qty<1){ alert(`${CLS[cls].name} has no ${u.name}!`); return; }
+
+  const roll=Math.floor(Math.random()*100)+1;
+  const sp=u.special;
+
+  if(sp==='drone'){
+    // Drone: guaranteed destroy 1 specific enemy inventory item
+    const unitEl=document.getElementById('dep-unit-DRONE');
+    const targetUnit=unitEl?unitEl.value:'';
+    if(!targetUnit){ alert('Select which enemy unit to destroy.'); return; }
+    const targetInv=S.inv[target]||{};
+    const targetQty=targetInv[targetUnit]||0;
+    if(targetQty<=0){ alert(`${CLS[target].name} has no ${UNITS[targetUnit]?UNITS[targetUnit].name:targetUnit} to destroy!`); return; }
+    setQty(cls,uk,qty-1);
+    setQty(target,targetUnit,targetQty-1);
+    saveState(); renderTeacherUI();
+    const unitName=UNITS[targetUnit]?UNITS[targetUnit].name:targetUnit;
+    addLog(`🛸 DRONE STRIKE! ${CLS[cls].name} destroys 1x ${unitName} from ${CLS[target].name}'s inventory!`);
+    alert(`🛸 DRONE STRIKE — CONFIRMED!\n\n${CLS[cls].name} destroyed:\n1x ${unitName} from ${CLS[target].name}\n\nNo roll needed — guaranteed hit.`);
+  }
+  else if(sp==='apache'){
+    if(!iso){ alert('Enter the target ISO code first.'); return; }
+    if(S.nuked&&S.nuked.includes(iso)){ alert(`${cname(iso)} is permanently destroyed.`); return; }
+    const isoOwner=S.own[iso];
+    if(!isoOwner||isoOwner===cls){ alert(`${cname(iso)} [${iso}] is not an enemy territory.`); return; }
+    setQty(cls,uk,qty-1);
+    if(roll<=65){
+      S.own[iso]=cls;
+      saveState(); refreshMap(); renderLB(); renderTeacherUI();
+      addLog(`🚁 APACHE SUCCESS! ${CLS[cls].name} captures ${cname(iso)} [${iso}] from ${CLS[isoOwner].name}! (roll: ${roll}/65)`);
+      alert(`🚁 APACHE HELICOPTER — SUCCESS!\n\n${CLS[cls].name} captures ${cname(iso)} [${iso}]!\n\n(Roll: ${roll}/65)`);
+    } else {
+      saveState(); renderTeacherUI();
+      addLog(`🚁 APACHE SHOT DOWN! ${CLS[cls].name} lost the helicopter over ${cname(iso)}. (roll: ${roll}/65)`);
+      alert(`💥 APACHE SHOT DOWN!\n\nHelicopter lost — territory unchanged.\n\n(Roll: ${roll}/65 — FAIL)`);
+    }
+    if(isoEl) isoEl.value='';
+  }
+  else if(sp==='stealth_bomber'){
+    setQty(cls,uk,qty-1);
+    if(roll<=60){
+      const enemyTerrs=Object.entries(S.own).filter(([i,o])=>o===target).map(([i])=>i);
+      if(enemyTerrs.length===0){
+        saveState(); renderTeacherUI();
+        addLog(`🛩️ STEALTH BOMBER: ${CLS[target].name} has no territories to lose!`);
+        alert(`🛩️ Stealth Bomber hit — but ${CLS[target].name} has no territories!`);
+      } else {
+        const shuffle=[...enemyTerrs].sort(()=>Math.random()-.5);
+        const lost=shuffle.slice(0,Math.min(2,shuffle.length));
+        lost.forEach(i=>delete S.own[i]);
+        saveState(); refreshMap(); renderLB(); renderTeacherUI();
+        addLog(`🛩️ STEALTH BOMBER SUCCESS! ${CLS[cls].name} strips ${lost.map(i=>cname(i)).join(' & ')} from ${CLS[target].name}! (roll: ${roll}/60)`);
+        alert(`🛩️ STEALTH BOMBER — SUCCESS!\n\n${CLS[target].name} loses:\n${lost.map(i=>`${cname(i)} [${i}]`).join('\n')}\nBoth go UNCLAIMED.\n\n(Roll: ${roll}/60)`);
+      }
+    } else {
+      saveState(); renderTeacherUI();
+      addLog(`🛩️ STEALTH BOMBER intercepted! ${CLS[cls].name}'s bomber was shot down. (roll: ${roll}/60)`);
+      alert(`💥 STEALTH BOMBER INTERCEPTED!\n\nUnit consumed, no effect.\n\n(Roll: ${roll}/60 — FAIL)`);
+    }
+  }
+  else if(sp==='nuclear_sub'){
+    setQty(cls,uk,qty-1);
+    if(roll<=65){
+      saveState(); renderTeacherUI();
+      addLog(`⚓ NUCLEAR SUB DEPLOYED! ${CLS[cls].name} can attack ANY territory + roll twice take better! (roll: ${roll}/65)`);
+      alert(`⚓ NUCLEAR SUBMARINE — DEPLOYED!\n\n${CLS[cls].name} may now:\n• Attack ANY territory on the map (no border needed)\n• Roll the d20 TWICE and take the higher result\n\nResolve the attack this turn, then the sub is consumed.\n\n(Roll: ${roll}/65)`);
+    } else {
+      saveState(); renderTeacherUI();
+      addLog(`⚓ NUCLEAR SUB DETECTED & DESTROYED! ${CLS[cls].name}'s sub was sunk. (roll: ${roll}/65)`);
+      alert(`💥 SUBMARINE DETECTED!\n\nEnemy sonar found and destroyed the sub. Unit lost.\n\n(Roll: ${roll}/65 — FAIL)`);
+    }
+  }
+  else if(sp==='tactical_nuke'){
+    if(!iso){ alert('Enter the target territory ISO code first.'); return; }
+    if(S.nuked&&S.nuked.includes(iso)){ alert(`${cname(iso)} is already destroyed.`); return; }
+    // Monarchy immune
+    const isoOwner=S.own[iso];
+    if(isoOwner&&S.govt[isoOwner]==='Monarchy'){
+      setQty(cls,uk,qty-1);
+      saveState(); renderTeacherUI();
+      addLog(`🎯 TACTICAL NUKE BLOCKED by ${CLS[isoOwner].name}'s Monarchy (Divine Right)!`);
+      alert(`👑 DIVINE RIGHT!\n\n${CLS[isoOwner].name}'s Monarchy shields ${cname(iso)} from Tactical ICBM strikes!`);
+      return;
+    }
+    setQty(cls,uk,qty-1);
+    if(roll<=50){
+      delete S.own[iso];
+      if(!S.nuked) S.nuked=[];
+      S.nuked.push(iso);
+      saveState(); refreshMap(); renderLB(); renderTeacherUI();
+      addLog(`🎯 TACTICAL NUKE HIT! ${cname(iso)} [${iso}] PERMANENTLY DESTROYED by ${CLS[cls].name}! (roll: ${roll}/50)`);
+      alert(`🎯 TACTICAL ICBM — DIRECT HIT!\n\n${cname(iso)} [${iso}] is PERMANENTLY DESTROYED.\n(No class can ever claim it again.)\n\nNote: No inventory wipe — only the land is gone.\n\n(Roll: ${roll}/50)`);
+    } else {
+      saveState(); renderTeacherUI();
+      addLog(`🎯 TACTICAL NUKE INTERCEPTED! ${cname(iso)} survives. (roll: ${roll}/50)`);
+      alert(`🛡️ TACTICAL ICBM INTERCEPTED!\n\nMissile shot down — ${cname(iso)} survives.\n\n(Roll: ${roll}/50 — FAIL)`);
+    }
+    if(isoEl) isoEl.value='';
+  }
+}
+
 // ─── EXPORT / IMPORT / RESET ───
 function openExportModal(){
-  const data={exported:new Date().toISOString(),state:{[SK.OWN]:JSON.stringify(S.own),[SK.GOLD]:JSON.stringify(S.gold),[SK.GOVT]:JSON.stringify(S.govt),[SK.BLOK]:JSON.stringify(S.blok),[SK.SKIP]:JSON.stringify(S.skip),[SK.LOG]:JSON.stringify(S.log),[SK.NUKED]:JSON.stringify(S.nuked)}};
+  const data={exported:new Date().toISOString(),state:{[SK.OWN]:JSON.stringify(S.own),[SK.GOLD]:JSON.stringify(S.gold),[SK.GOVT]:JSON.stringify(S.govt),[SK.BLOK]:JSON.stringify(S.blok),[SK.SKIP]:JSON.stringify(S.skip),[SK.LOG]:JSON.stringify(S.log),[SK.NUKED]:JSON.stringify(S.nuked),[SK.INV]:JSON.stringify(S.inv),[SK.TURNS]:JSON.stringify(S.turns)}};
   document.getElementById('export-ta').value = JSON.stringify(data,null,2);
   document.getElementById('export-copy-msg').textContent='';
   document.getElementById('export-modal').classList.add('open');
@@ -1078,6 +1585,29 @@ window.addEventListener('resize',()=>{
 });
 </script>
 
+<!-- STUDENT CUTSCENE OVERLAY -->
+<div id="s-cutscene">
+  <div class="sc-label" id="sc-label">⚔️ UNIT PREVIEW</div>
+  <video id="sc-video" playsinline webkit-playsinline onended="closeStudentCutscene()">
+    <source id="sc-src" src="" type="video/mp4">
+  </video>
+  <div class="sc-skip" onclick="closeStudentCutscene()">▶ SKIP / CLOSE</div>
+</div>
+
+<!-- UNIT VIDEOS BROWSER MODAL -->
+<div id="unit-videos-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);z-index:4000;display:none;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:3px solid #00ccff;width:min(95vw,560px);max-height:90vh;display:flex;flex-direction:column;box-shadow:10px 10px 0 rgba(0,0,0,.7)">
+    <div style="background:#00ccff;color:var(--bg);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <strong style="font-family:var(--font);letter-spacing:2px">📽️ UNIT VIDEO LIBRARY</strong>
+      <button onclick="closeUnitVideos()" style="background:none;border:none;color:var(--bg);font-size:1.3em;cursor:pointer;font-weight:700">✕</button>
+    </div>
+    <div style="padding:14px;overflow-y:auto">
+      <p style="font-size:.78em;color:#888;margin-bottom:12px;font-family:var(--font)">Tap any unit to watch its cutscene.</p>
+      <div class="unit-vid-grid" id="unit-vid-grid"></div>
+    </div>
+  </div>
+</div>
+
 <!-- FAQ MODAL -->
 <div id="faq-modal">
   <div class="faq-box">
@@ -1144,7 +1674,7 @@ const FAQ_DB = {
   'Government & Leadership': [
     {
       q: 'What is a government type and why does it matter?',
-      a: 'Your class votes on a government type, which gives your empire a permanent special bonus for the rest of the game.\n\n🗳️ Democracy — +1 to ALL defense rolls\n📜 Republic — Claim 1 extra territory per turn\n👑 Monarchy — Immune to Nuclear Warhead & Cyber Attack (Divine Right)\n✊ Dictatorship — Airborne Rangers cost only $50\n🔒 Authoritarianism — Blockades last 2 weeks instead of 1\n⚡ Totalitarianism — +3 to attack rolls, but -1 to defense\n💰 Oligarchy — Receive +$500 bonus gold immediately upon selection\n✝️ Theocracy — Immune to Cyber Attack'
+      a: 'Every government gives a benefit AND has a consequence — choose wisely!\n\n🗳️ Democracy — +3 defense · Inventory wiped if attacker exceeds 18\n📜 Republic — Claim 4 territories/turn · Class votes on every decision\n👑 Monarchy — Immune to all nukes · No infantry ever\n✊ Dictatorship — +2 attack, Drones $50 destroy inventory · Lose territory on failed attacks\n🔒 Authoritarianism — +d10 to every roll · Zero inventory allowed\n⚡ Totalitarianism — +3 attack · -2 defense\n💰 Oligarchy — +$200 on any gold award · No infantry\n✝️ Theocracy — Draft min 3, Apache immune · No attacks on Fridays'
     },
     {
       q: 'How does leadership work?',
@@ -1280,6 +1810,60 @@ function filterCountries(query){
   });
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// STUDENT UNIT CUTSCENE SYSTEM
+// ═══════════════════════════════════════════════════════════════════
+function playUnitVideo(uk){
+  const vdata=UNIT_VIDEOS[uk];
+  if(!vdata){ alert('No video available for this unit.'); return; }
+  const label=document.getElementById('sc-label');
+  const src=document.getElementById('sc-src');
+  const vid=document.getElementById('sc-video');
+  label.textContent=vdata.label;
+  src.src=vdata.file;
+  vid.load();
+  vid.play().catch(()=>{});
+  document.getElementById('s-cutscene').classList.add('open');
+  // Close unit videos browser if open
+  document.getElementById('unit-videos-modal').style.display='none';
+}
+
+function closeStudentCutscene(){
+  const el=document.getElementById('s-cutscene');
+  const vid=document.getElementById('sc-video');
+  const src=document.getElementById('sc-src');
+  vid.pause(); vid.currentTime=0; src.src=''; vid.load();
+  el.classList.remove('open');
+}
+
+function openUnitVideos(){
+  // Build the grid of all 6 units
+  const grid=document.getElementById('unit-vid-grid');
+  grid.innerHTML=Object.entries(UNIT_VIDEOS).map(([uk,v])=>{
+    const u=UNITS[uk];
+    return `<button class="unit-vid-btn" onclick="playUnitVideo('${uk}')">
+      <span class="uv-emoji">${u.emoji}</span>
+      <span style="font-weight:700;color:var(--yellow)">${u.name}</span>
+      <span class="uv-label">▶ Play Video</span>
+    </button>`;
+  }).join('');
+  document.getElementById('unit-videos-modal').style.display='flex';
+}
+
+function closeUnitVideos(){
+  document.getElementById('unit-videos-modal').style.display='none';
+}
+
+// Close cutscene on background click
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('s-cutscene').addEventListener('click',e=>{
+    if(e.target===document.getElementById('s-cutscene')) closeStudentCutscene();
+  });
+  document.getElementById('unit-videos-modal').addEventListener('click',e=>{
+    if(e.target===document.getElementById('unit-videos-modal')) closeUnitVideos();
+  });
+});
+
 function openFAQ(category){
   const modal = document.getElementById('faq-modal');
   modal.classList.add('open');
@@ -1339,6 +1923,7 @@ async function publishToFirebase(){
     blok:  S.blok,
     skip:  S.skip,
     nuked: S.nuked,
+    inv:   S.inv,
     log:   S.log.slice(-30),
     published: Date.now()
   };
@@ -1390,6 +1975,7 @@ async function pollFirebaseState(){
     if(d.blok) S.blok = d.blok;
     if(d.skip) S.skip = d.skip;
     if(d.nuked)S.nuked= d.nuked;
+    if(d.inv)  S.inv  = d.inv;
     if(d.log)  S.log  = d.log;
     renderStudentView(_currentStudentCls);
     refreshMiniMap();
