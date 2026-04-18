@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔️ Total World Conquest: Modern Era</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+:root {
+  --bg:      #0a0e27;
+  --bg2:     #1a1a2e;
+  --green:   #00ff00;
+  --yellow:  #ffff00;
+  --red:     #ff0000;
+  --border:  #00ff00;
+  --shadow:  rgba(0,255,0,0.3);
+  --font:    'Courier New', monospace;
+  --bsz:     3px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--green);font-family:var(--font);overflow:hidden;height:100vh}
+.screen{width:100vw;height:100vh;overflow:auto;display:none}
+.screen.active{display:block}
+
+/* ── RETRO BASE ── */
+.retro-header{background:var(--yellow);color:var(--bg);padding:14px 20px;border:var(--bsz) solid var(--green);text-align:center;box-shadow:8px 8px 0 rgba(0,0,0,.5);margin:8px}
+.retro-header h1{font-size:2em;text-shadow:2px 2px 0 var(--bg);letter-spacing:2px}
+.retro-header p{font-size:1em;font-weight:700;margin-top:4px}
+.retro-panel{background:var(--bg2);border:var(--bsz) solid var(--border);padding:14px;margin:8px;box-shadow:inset 0 0 10px var(--shadow),5px 5px 0 rgba(0,0,0,.5)}
+.retro-panel h2{color:var(--yellow);font-size:1.2em;border-bottom:2px dashed var(--border);padding-bottom:8px;margin-bottom:10px}
+.retro-btn{background:var(--yellow);color:var(--bg);border:var(--bsz) solid var(--green);padding:8px 18px;font-family:var(--font);font-size:.9em;font-weight:700;cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.5);transition:all .1s;margin:4px}
+.retro-btn:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:6px 6px 0 rgba(0,0,0,.5)}
+.retro-btn:active:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(0,0,0,.5)}
+.retro-btn:disabled{opacity:.45;cursor:not-allowed}
+.retro-btn.secondary{background:var(--bg);color:var(--green);border-color:var(--green)}
+.retro-btn.danger{background:#ff3333;color:#fff;border-color:#fff}
+.retro-btn.sm{padding:4px 10px;font-size:.78em;margin:2px}
+
+/* ── LOGIN ── */
+#login-screen{background:linear-gradient(45deg,#0a0e27 25%,transparent 25%,transparent 75%,#0a0e27 75%,#0a0e27),linear-gradient(45deg,#0a0e27 25%,transparent 25%,transparent 75%,#0a0e27 75%,#0a0e27);background-size:60px 60px;background-position:0 0,30px 30px;background-color:var(--bg)}
+.login-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.period-btn{background:var(--bg);border:2px solid var(--green);color:var(--green);padding:18px;font-family:var(--font);font-size:1.1em;font-weight:700;cursor:pointer;transition:all .2s}
+.period-btn:hover{background:var(--yellow);color:var(--bg);border-color:var(--yellow);box-shadow:0 0 15px rgba(255,255,0,.5)}
+.period-btn span{display:block;font-size:.8em;margin-top:4px}
+.how-to{text-align:left;font-size:.88em;line-height:1.7}
+
+/* ── STUDENT DASHBOARD ── */
+#student-screen .s-layout{display:grid;grid-template-columns:1fr 1fr;gap:0;height:calc(100vh - 100px);overflow:hidden}
+#student-screen .s-layout .retro-panel{overflow-y:auto;max-height:calc(100vh - 120px);margin:6px}
+.stat-line{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--border);font-size:1em}
+.stat-line:last-child{border-bottom:none}
+.stat-val{color:var(--yellow);font-weight:700;font-size:1.2em}
+.lb-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.9em}
+.lb-table th{background:var(--yellow);color:var(--bg);padding:6px 10px;text-align:left;border:1px solid var(--bg)}
+.lb-table td{padding:6px 10px;border:1px dashed var(--border)}
+.lb-table tr:hover td{background:rgba(0,255,0,.08)}
+.rank-1{color:var(--yellow);font-weight:700}
+.skip-badge{background:#ff3333;color:#fff;padding:2px 6px;font-size:.7em;border-radius:3px;margin-left:6px}
+.govt-badge{background:var(--bg);border:1px solid var(--border);color:var(--green);padding:2px 8px;font-size:.7em;border-radius:3px;margin:2px;display:inline-block}
+
+/* ── TEACHER MAP LAYOUT ── */
+#teacher-screen{display:none!important}
+#teacher-screen.active{display:flex!important;flex-direction:column}
+#teacher-screen .t-header{background:var(--yellow);color:var(--bg);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--green);flex-shrink:0}
+#teacher-screen .t-header h1{font-size:1.2em;font-weight:700;letter-spacing:2px}
+#teacher-screen .t-body{display:flex;flex:1;overflow:hidden}
+#map-wrap{flex:1;position:relative;background:#000d1a}
+#map-svg{width:100%;height:100%}
+#t-sidebar{width:290px;background:var(--bg2);border-left:2px solid var(--green);overflow-y:auto;flex-shrink:0}
+#t-sidebar .retro-panel{margin:6px;padding:10px}
+#t-sidebar .retro-panel h2{font-size:.85em;padding-bottom:6px;margin-bottom:8px}
+
+/* MAP COUNTRIES */
+.country{stroke:#0d1224;stroke-width:.5;cursor:pointer;transition:filter .15s}
+.country:hover{filter:brightness(1.4) saturate(1.3);stroke:#ffff00;stroke-width:1.5}
+.country-unclaimed{fill:#b8c9c9;stroke:#6a8a8a;stroke-width:0.6}
+.country-1st{fill:#d94141}
+.country-2nd{fill:#2ea44f}
+.country-5th{fill:#f2c94c}
+.country-6th{fill:#2f6fed}
+.country-skipped{stroke:#ff3300!important;stroke-width:2!important;stroke-dasharray:5,3}
+.country-nuked{fill:#1a1a1a!important;stroke:#ff4400!important;stroke-width:1.5!important;opacity:0.6!important}
+
+/* TOOLTIP */
+#tt{position:fixed;background:var(--bg2);border:2px solid var(--yellow);color:var(--green);padding:8px 12px;font-size:.76em;pointer-events:none;z-index:500;display:none;font-family:var(--font);box-shadow:3px 3px 0 rgba(0,0,0,.5)}
+
+/* LEADERBOARD SIDEBAR */
+.lb-row{display:flex;align-items:center;gap:6px;padding:6px 4px;border-bottom:1px dashed var(--border);font-size:.82em}
+.lb-row:last-child{border-bottom:none}
+.lb-dot{width:12px;height:12px;border:1px solid #fff;flex-shrink:0}
+.lb-pts{color:var(--yellow);font-weight:700;margin-left:auto}
+
+/* TEACHER CONTROLS */
+.ctrl-row{display:flex;gap:4px;align-items:center;margin:4px 0;flex-wrap:wrap}
+.ctrl-select{background:var(--bg);border:1px solid var(--border);color:var(--green);padding:4px 6px;font-family:var(--font);font-size:.76em}
+.ctrl-input{background:var(--bg);border:1px solid var(--border);color:var(--yellow);padding:4px 6px;font-family:var(--font);font-size:.76em;width:90px}
+.ctrl-input::placeholder{color:#444}
+.ctrl-label{font-size:.74em;color:#888;display:block;margin-bottom:2px}
+
+/* GOLD ROW */
+.gold-row{display:flex;align-items:center;gap:4px;margin:3px 0;font-size:.78em}
+.gold-amt{background:var(--bg);border:1px solid #ffd700;color:#ffd700;padding:2px 8px;min-width:70px;text-align:center;font-weight:700}
+
+/* MODAL */
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--yellow);color:var(--bg);border:4px solid var(--green);padding:24px;max-width:500px;width:92%;box-shadow:10px 10px 0 rgba(0,0,0,.7);max-height:90vh;overflow-y:auto}
+.modal h2{color:var(--bg);border-bottom:3px solid var(--bg);margin-bottom:16px;font-size:1.2em}
+.modal-close{float:right;background:none;border:none;color:var(--bg);font-size:1.5em;cursor:pointer;margin-top:-4px}
+.pin-input{background:#fff;border:3px solid var(--bg);color:var(--bg);padding:8px 16px;font-size:1.3em;text-align:center;width:150px;letter-spacing:5px;font-family:var(--font)}
+.pin-err{color:#cc0000;font-size:.8em;min-height:18px;margin-top:4px;text-align:center}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--bg);border:1px solid var(--border)}
+::-webkit-scrollbar-thumb{background:var(--yellow);border:1px solid var(--border)}
+@media(max-width:900px){
+  #student-screen .s-layout{grid-template-columns:1fr}
+  #t-sidebar{width:240px}
+}
+
+/* COUNTRY LIST MODAL */
+#country-list-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);z-index:2000;display:none;align-items:center;justify-content:center}
+#country-list-modal.open{display:flex}
+.cl-box{background:var(--bg2);border:3px solid var(--yellow);padding:0;width:min(95vw,900px);max-height:90vh;display:flex;flex-direction:column;box-shadow:10px 10px 0 rgba(0,0,0,.7);font-family:var(--font)}
+.cl-header{background:var(--yellow);color:var(--bg);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cl-header h2{font-size:1.1em;margin:0;letter-spacing:1px}
+.cl-search{background:var(--bg);border:2px solid var(--green);color:var(--green);padding:6px 12px;font-family:var(--font);font-size:.9em;width:200px}
+.cl-search::placeholder{color:#444}
+.cl-body{overflow-y:auto;padding:12px;flex:1}
+.cl-region{margin-bottom:14px}
+.cl-region-title{color:var(--yellow);font-size:.82em;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-bottom:1px dashed var(--border);padding-bottom:4px;margin-bottom:6px}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px}
+.cl-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid #1a3a1a;font-size:.78em;cursor:default}
+.cl-item:hover{background:rgba(0,255,0,.07);border-color:var(--green)}
+.cl-item.owned-1st{border-left:3px solid #d94141}
+.cl-item.owned-2nd{border-left:3px solid #2ea44f}
+.cl-item.owned-5th{border-left:3px solid #f2c94c}
+.cl-item.owned-6th{border-left:3px solid #2f6fed}
+.cl-item.nuked{opacity:.45;text-decoration:line-through}
+.cl-code{background:var(--bg);border:1px solid #2a4a2a;color:var(--yellow);padding:1px 5px;font-size:.85em;font-weight:700;min-width:28px;text-align:center;flex-shrink:0}
+.cl-pts{color:#888;font-size:.75em;margin-left:auto;flex-shrink:0}
+.cl-footer{background:#0a0e1a;padding:8px 16px;display:flex;gap:16px;flex-wrap:wrap;flex-shrink:0;border-top:1px solid var(--border);font-size:.75em}
+.cl-legend{display:flex;align-items:center;gap:5px}
+
+/* BLOCKADE COUNTDOWN */
+#blockade-ticker{position:absolute;top:6px;left:50%;transform:translateX(-50%);display:flex;gap:6px;flex-wrap:wrap;justify-content:center;z-index:10;pointer-events:none;max-width:95%}
+.blok-chip{background:rgba(0,0,0,.82);border:1px solid #ff6b00;color:#ff9933;font-family:var(--font);font-size:.68em;padding:3px 9px;white-space:nowrap;pointer-events:none}
+.blok-chip strong{color:#ffcc00}
+
+/* FAQ */
+#faq-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:2000;display:none;align-items:center;justify-content:center}
+#faq-modal.open{display:flex}
+.faq-box{background:var(--bg2);border:3px solid #c084fc;width:min(96vw,780px);max-height:92vh;display:flex;flex-direction:column;box-shadow:10px 10px 0 rgba(0,0,0,.7);font-family:var(--font)}
+.faq-header{background:#c084fc;color:var(--bg);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.faq-header h2{font-size:1.1em;margin:0;letter-spacing:1px}
+.faq-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:10px 12px;border-bottom:1px solid #2a2a4a;flex-shrink:0;background:#0a0e1a}
+.faq-tab{background:var(--bg);border:1px solid #2a2a4a;color:#888;padding:4px 10px;font-family:var(--font);font-size:.72em;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.faq-tab:hover{border-color:#c084fc;color:#c084fc}
+.faq-tab.active{background:#c084fc;color:var(--bg);border-color:#c084fc}
+.faq-content{flex:1;overflow-y:auto;padding:10px 14px}
+.faq-item{border-bottom:1px dashed #1a2a1a;margin-bottom:4px}
+.faq-q{display:flex;align-items:flex-start;gap:10px;padding:10px 4px;cursor:pointer;font-size:.85em;font-weight:700;color:var(--green);line-height:1.4;user-select:none}
+.faq-q:hover{color:var(--yellow)}
+.faq-arrow{color:#555;font-size:.8em;flex-shrink:0;margin-top:2px;transition:color .2s}
+.faq-a{display:none;padding:6px 14px 12px 24px;font-size:.8em;color:#bbb;line-height:1.7;border-left:2px solid #1a3a1a;margin-left:10px;margin-bottom:4px}
+.faq-a.open{display:block}
+.faq-footer{padding:8px 14px;border-top:1px solid #1a2a1a;font-size:.68em;color:#555;flex-shrink:0;text-align:center}
+
+/* BACKGROUND VIDEO / MAP */
+#map-wrap {
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+#map-bg-video {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.55;
+}
+#map-svg {
+  position: relative;
+  z-index: 1;
+}
+.country{fill-opacity:1.0}
+.country-unclaimed{fill:#b8c9c9;stroke:#6a8a8a;stroke-width:0.6}
+#map-country-info { z-index: 10; }
+.mini-country{stroke:#0d1224;stroke-width:.3}
+.mini-unclaimed{fill:#2a3a4a}
+.mini-1st{fill:#d94141}
+.mini-2nd{fill:#2ea44f}
+.mini-5th{fill:#f2c94c}
+.mini-6th{fill:#2f6fed}
+.mini-nuked{fill:#1a1a1a;opacity:0.5}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN ══════════════════ -->
+<div id="login-screen" class="screen active">
+  <div style="max-width:620px;margin:0 auto;padding:10px">
+    <div class="retro-header">
+      <h1>⚔️ TOTAL WORLD CONQUEST ⚔️</h1>
+      <p>Modern Era · 7th Grade Social Studies</p>
+    </div>
+    <div class="retro-panel">
+      <h2>👨‍🎓 STUDENT — SELECT YOUR PERIOD</h2>
+      <div class="login-grid">
+        <button class="period-btn" onclick="goStudent(1)">Period 1 <span>🔴 RED EMPIRE</span></button>
+        <button class="period-btn" onclick="goStudent(2)">Period 2 <span>🟢 GREEN EMPIRE</span></button>
+        <button class="period-btn" onclick="goStudent(5)">Period 5 <span>🟡 YELLOW EMPIRE</span></button>
+        <button class="period-btn" onclick="goStudent(6)">Period 6 <span>🔵 BLUE EMPIRE</span></button>
+      </div>
+    </div>
+    <div class="retro-panel">
+      <h2>👨‍🏫 TEACHER</h2>
+      <button class="retro-btn" style="width:100%;padding:14px;font-size:1.1em" onclick="openPinModal()">🔐 CONTROL PANEL</button>
+    </div>
+    <div class="retro-panel">
+      <h2>📖 HOW TO PLAY</h2>
+      <div class="how-to">
+        🌍 <strong>Claim territories</strong> each day to expand your empire<br/>
+        💰 <strong>Earn gold</strong> from participation stamps awarded by your teacher<br/>
+        ⚔️ <strong>Roll d20</strong> to attack neighboring class territories<br/>
+        🏛️ <strong>Choose a government</strong> to unlock special bonuses<br/>
+        🏆 <strong>Win</strong> by controlling the most territory points
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ STUDENT ══════════════════ -->
+<div id="student-screen" class="screen">
+  <div class="retro-header" id="s-header">
+    <h1>⚔️ TOTAL WORLD CONQUEST ⚔️</h1>
+    <p id="s-subhead">Period X · COLOR EMPIRE</p>
+  </div>
+  <div class="s-layout">
+    <!-- LEFT: Stats + Government -->
+    <div class="retro-panel">
+      <h2>📊 EMPIRE STATUS</h2>
+      <div id="s-stats"></div>
+      <h2 style="margin-top:14px">🏛️ GOVERNMENT</h2>
+      <div id="s-govt" style="font-size:.9em;padding:4px 0 8px"></div>
+    </div>
+    <!-- RIGHT: Leaderboard + Mini Map + Log -->
+    <div class="retro-panel">
+      <h2>🏆 LEADERBOARD</h2>
+      <table class="lb-table" id="s-leaderboard"></table>
+      <h2>🗺️ LIVE MAP</h2>
+      <div id="mini-map-wrap" style="position:relative;width:100%;height:420px;background:#1a3a5a;border:2px solid #00ff00;overflow:hidden;margin:8px 0">
+        <svg id="mini-map-svg" style="width:100%;height:100%;display:block"></svg>
+        <button id="mini-refresh" onclick="refreshMiniMap()">↻ REFRESH</button>
+        <div id="mini-last-update">Loading...</div>
+      </div>
+      <h2 style="margin-top:14px">📋 BATTLE LOG</h2>
+      <div id="s-log" style="font-size:.78em;max-height:200px;overflow-y:auto;background:var(--bg);padding:8px;border:1px dashed var(--border)"></div>
+      <button class="retro-btn" style="margin-top:6px;width:100%;background:#1a3a1a;color:var(--green);border-color:var(--green)" onclick="openCountryList()">🌍 VIEW ALL COUNTRIES &amp; CODES</button>
+      <button class="retro-btn" style="margin-top:6px;width:100%;background:#1a0a2a;color:#c084fc;border-color:#c084fc" onclick="openFAQ()">❓ GAME HELP &amp; FAQ</button>
+      <button class="retro-btn secondary" style="margin-top:6px;width:100%" onclick="goLogin()">← BACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ TEACHER ══════════════════ -->
+<div id="teacher-screen" class="screen">
+  <div class="t-header">
+    <h1>⚔️ TWC: MODERN ERA — TEACHER PANEL</h1>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="t-date" style="font-size:.75em"></span>
+      <button class="retro-btn sm" onclick="goLogin()">EXIT</button>
+    </div>
+  </div>
+  <div class="t-body">
+    <!-- MAP -->
+    <div id="map-wrap">
+      <img id="map-bg-video" src="water.gif" alt="">
+      <div id="blockade-ticker"></div>
+      <svg id="map-svg"></svg>
+      <div id="map-country-info" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:var(--bg2);border:2px solid var(--yellow);padding:10px 20px;font-family:var(--font);color:var(--green);font-size:.82em;display:none;min-width:280px;text-align:center;box-shadow:4px 4px 0 rgba(0,0,0,.5)"></div>
+    </div>
+    <!-- SIDEBAR -->
+    <div id="t-sidebar">
+
+      <!-- LEADERBOARD -->
+      <div class="retro-panel">
+        <h2>🏆 LEADERBOARD</h2>
+        <div id="t-lb"></div>
+      </div>
+
+      <!-- TERRITORY CONTROL -->
+      <div class="retro-panel">
+        <h2>🗺️ TERRITORY</h2>
+        <label class="ctrl-label">Country ISO Code</label>
+        <div class="ctrl-row">
+          <input class="ctrl-input" id="ctrl-iso" placeholder="e.g. FR" maxlength="3" style="text-transform:uppercase"/>
+          <select class="ctrl-select" id="ctrl-class">
+            <option value="">Unclaim</option>
+            <option value="1st">1st (Red)</option>
+            <option value="2nd">2nd (Green)</option>
+            <option value="5th">5th (Yellow)</option>
+            <option value="6th">6th (Blue)</option>
+          </select>
+          <button class="retro-btn sm" onclick="claimTerritory()">✓ SET</button>
+          <button class="retro-btn sm secondary" onclick="openCountryList()" title="Browse all country codes">🌍</button>
+        </div>
+        <label class="ctrl-label" style="margin-top:8px">Lift blockade on territory</label>
+        <div class="ctrl-row">
+          <input class="ctrl-input" id="lift-iso" placeholder="ISO code" maxlength="3" style="text-transform:uppercase;width:80px"/>
+          <button class="retro-btn sm danger" onclick="liftBlockade()">🚧 LIFT</button>
+        </div>
+        <div id="blockade-list" style="margin-top:6px;font-size:.72em;color:#888"></div>
+      </div>
+
+      <!-- GOVERNMENT -->
+      <div class="retro-panel">
+        <h2>🏛️ GOVERNMENT</h2>
+        <div id="govt-rows"></div>
+      </div>
+
+      <!-- GOLD -->
+      <div class="retro-panel">
+        <h2>💰 GOLD AWARDS</h2>
+        <div id="gold-rows"></div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="retro-panel">
+        <h2 style="color:#c084fc;border-color:#2a2a4a">❓ GAME HELP</h2>
+        <button class="retro-btn sm" style="width:100%;background:#1a0a2a;color:#c084fc;border-color:#c084fc" onclick="openFAQ()">VIEW FAQ</button>
+      </div>
+
+      <!-- SAVE / EXPORT -->
+      <div class="retro-panel">
+        <h2>💾 DATA</h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="retro-btn sm secondary" onclick="openExportModal()">📤 Export</button>
+          <button class="retro-btn sm secondary" onclick="openImportModal()">📥 Import</button>
+          <button class="retro-btn sm danger" onclick="openResetPin()">🗑️ Reset</button>
+        </div>
+        <button class="retro-btn" style="width:100%;margin-top:8px;background:#001a00;color:#00ff88;border-color:#00ff88;font-size:.85em" onclick="publishToFirebase()">📡 PUBLISH TO STUDENTS</button>
+        <div id="fb-pub-msg" style="font-size:.72em;min-height:16px;margin-top:4px;color:#00ff88"></div>
+      </div>
+
+      <!-- BCB RANGER INBOX -->
+      <div class="retro-panel" id="bcb-panel">
+        <h2>🪂 BCB RANGER INBOX <button onclick="loadBCBInbox()" style="background:none;border:none;color:#ffd700;cursor:pointer;font-size:.9em;margin-left:6px" title="Refresh">↻</button></h2>
+        <div id="bcb-inbox-list"><div style="font-size:.75em;color:#555;padding:4px">Loading...</div></div>
+      </div>
+
+    </div><!-- /sidebar -->
+  </div>
+</div>
+
+<!-- ══════════════ MODALS ══════════════ -->
+<div class="modal-bg" id="pin-modal">
+  <div class="modal" style="max-width:320px;text-align:center">
+    <h2 id="pin-modal-title">🔐 TEACHER ACCESS</h2>
+    <p style="font-size:.85em;margin-bottom:14px;color:var(--bg)" id="pin-modal-desc">Enter PIN to access controls</p>
+    <input class="pin-input" id="pin-in" type="password" maxlength="6" placeholder="••••" onkeydown="if(event.key==='Enter')checkPin()">
+    <div class="pin-err" id="pin-err"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="retro-btn" style="flex:1" onclick="checkPin()">UNLOCK</button>
+      <button class="retro-btn secondary" style="flex:1" onclick="closeModal('pin-modal')">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-bg" id="export-modal">
+  <div class="modal" style="max-width:560px;text-align:left">
+    <button class="modal-close" onclick="closeModal('export-modal')">✕</button>
+    <h2>📤 EXPORT GAME STATE</h2>
+    <p style="font-size:.82em;color:var(--bg);margin-bottom:10px">Select all text below, copy it, then paste into a .txt or .json file on your computer.</p>
+    <textarea id="export-ta" style="width:100%;height:180px;background:#fff;color:#000;border:2px solid var(--bg);font-family:monospace;font-size:.72em;padding:6px;resize:vertical" readonly></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="retro-btn" style="flex:1" onclick="selectExportAll()">📋 SELECT ALL</button>
+      <button class="retro-btn" style="flex:1" onclick="copyExportText()">⬇️ COPY TO CLIPBOARD</button>
+      <button class="retro-btn secondary" onclick="closeModal('export-modal')">CLOSE</button>
+    </div>
+    <div id="export-copy-msg" style="font-size:.75em;color:green;margin-top:6px;min-height:18px"></div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-bg" id="import-modal">
+  <div class="modal" style="max-width:560px;text-align:left">
+    <button class="modal-close" onclick="closeModal('import-modal')">✕</button>
+    <h2>📥 IMPORT GAME STATE</h2>
+    <p style="font-size:.82em;color:var(--bg);margin-bottom:6px">Paste your exported save data below, then click LOAD.</p>
+    <textarea id="import-ta" style="width:100%;height:180px;background:#fff;color:#000;border:2px solid var(--bg);font-family:monospace;font-size:.72em;padding:6px;resize:vertical" placeholder="Paste JSON save data here..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="retro-btn" style="flex:1" onclick="importFromText()">✅ LOAD SAVE</button>
+      <button class="retro-btn secondary" onclick="closeModal('import-modal')">CANCEL</button>
+    </div>
+    <div id="import-msg" style="font-size:.75em;margin-top:6px;min-height:18px"></div>
+  </div>
+</div>
+
+<div id="tt"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════════
+const LEGACY = { '1st':56, '2nd':348, '5th':165, '6th':293 };
+
+const CLS = {
+  '1st':{ name:'1st Hour', color:'#cc2200', dot:'#cc2200', mapCls:'country-1st', emoji:'🔴' },
+  '2nd':{ name:'2nd Hour', color:'#00aa33', dot:'#00aa33', mapCls:'country-2nd', emoji:'🟢' },
+  '5th':{ name:'5th Hour', color:'#cc9900', dot:'#cc9900', mapCls:'country-5th', emoji:'🟡' },
+  '6th':{ name:'6th Hour', color:'#1155cc', dot:'#1155cc', mapCls:'country-6th', emoji:'🔵' },
+};
+
+const GOVTS = {
+  'Democracy':       { icon:'🗳️', bonus:'defense_plus1',  desc:'+1 to all defense rolls' },
+  'Republic':        { icon:'📜', bonus:'extra_claim',     desc:'Claim 1 EXTRA territory/turn' },
+  'Monarchy':        { icon:'👑', bonus:'divine_right',    desc:'Immune to Nuke & Cyber Attack' },
+  'Dictatorship':    { icon:'✊', bonus:'cheap_rangers',   desc:'Airborne Rangers cost $50' },
+  'Authoritarianism':{ icon:'🔒', bonus:'long_blockade',   desc:'Blockades last 2 weeks' },
+  'Totalitarianism': { icon:'⚡', bonus:'total_control',   desc:'+3 attack, -1 defense' },
+  'Oligarchy':       { icon:'💰', bonus:'gold_bonus',      desc:'+$500 bonus gold on set' },
+  'Theocracy':       { icon:'✝️', bonus:'cyber_immune',    desc:'Immune to Cyber Attack' },
+};
+
+// 5 Themes: [Location, Place, H-E Interaction, Movement, Region]
+const CV = {
+  'US':[5,5,5,5,5],'CN':[5,5,4,5,5],'RU':[5,5,3,4,5],'DE':[4,4,4,5,5],'GB':[5,4,3,5,5],
+  'FR':[4,4,4,4,5],'JP':[4,3,3,5,4],'IN':[4,4,4,4,4],'BR':[3,5,5,4,3],'CA':[3,5,4,4,4],
+  'AU':[3,5,3,4,3],'SA':[4,5,1,4,4],'TR':[5,3,3,4,3],'EG':[5,3,2,4,3],'IT':[4,3,4,5,4],
+  'ES':[4,3,4,4,4],'MX':[4,4,3,4,3],'KR':[4,3,3,5,4],'ID':[4,4,3,4,3],'NO':[4,5,3,4,4],
+  'SE':[3,4,4,4,4],'NL':[5,2,3,5,4],'PA':[5,2,2,5,2],'SG':[5,2,1,5,3],'AE':[4,5,1,5,3],
+  'PL':[3,3,3,3,3],'UA':[3,4,5,3,2],'AR':[3,4,5,3,3],'ZA':[3,4,3,3,3],'NG':[3,4,3,3,3],
+  'CH':[4,3,3,4,4],'BE':[4,2,3,4,4],'DK':[4,3,3,4,4],'AT':[4,2,3,4,3],'FI':[3,4,3,3,3],
+  'TW':[4,3,3,5,3],'MY':[4,4,3,4,3],'TH':[3,3,4,4,2],'VN':[3,3,4,3,2],'PH':[4,3,3,4,2],
+  'IL':[4,3,3,4,3],'QA':[4,5,1,4,2],'KW':[4,5,1,4,2],'IR':[4,5,2,3,2],'IQ':[3,5,1,3,2],
+  'OM':[4,4,1,3,2],'AZ':[3,3,2,3,2],'KZ':[3,5,2,3,3],'CL':[3,4,3,3,2],'CO':[3,4,4,3,2],
+  'PE':[3,4,3,2,2],'VE':[3,5,2,3,2],'MA':[4,3,3,3,2],'TN':[4,3,3,3,2],'PT':[4,3,3,4,3],
+  'HU':[3,2,4,3,2],'CZ':[3,2,3,3,3],'RO':[3,3,4,3,2],'GR':[4,2,3,4,2],'TT':[4,4,2,3,2],
+  'LY':[3,4,1,2,2],'DZ':[3,4,2,2,2],'EC':[3,4,3,2,2],'BD':[3,2,4,3,2],'PK':[3,3,3,2,2],
+  'LK':[4,2,3,4,2],'MM':[3,3,3,2,1],'KH':[3,2,4,2,1],'NZ':[3,3,4,3,3],'IE':[4,2,3,4,3],
+  'UZ':[2,3,2,2,2],'AF':[3,3,1,1,1],'GE':[3,2,3,3,2],'AM':[2,2,2,2,2],'BY':[2,2,3,3,2],
+  'CD':[2,5,3,1,1],'AO':[3,4,2,2,1],'TZ':[3,3,4,2,2],'KE':[3,2,3,2,2],'ET':[2,3,3,2,2],
+  'MZ':[3,3,3,2,1],'ZM':[2,4,3,2,1],'ZW':[2,3,3,2,1],'GH':[3,3,3,3,2],'CM':[2,3,3,2,1],
+  'CI':[3,3,4,3,2],'SN':[3,2,3,3,2],'SY':[4,3,2,2,1],'JO':[4,2,2,3,2],'LB':[4,2,2,3,2],
+  'HR':[4,2,3,3,2],'RS':[3,2,3,2,2],'BA':[3,2,3,2,1],'SK':[2,2,3,2,2],'SI':[3,2,3,3,2],
+  'BG':[3,2,3,3,2],'AL':[3,2,2,2,1],'MK':[2,2,2,2,1],'ME':[3,2,2,2,1],'MD':[2,2,3,2,1],
+  'LT':[3,2,3,3,2],'LV':[3,2,3,3,2],'EE':[3,2,3,3,3],'IS':[3,4,3,3,2],'UY':[3,3,5,3,2],
+  'PY':[2,2,4,2,1],'BO':[2,4,2,1,1],'GY':[2,3,3,2,1],'SR':[2,3,3,2,1],'MG':[3,3,3,2,2],
+  'NA':[2,4,1,2,1],'BW':[2,4,2,2,2],'LS':[1,2,2,1,1],'SZ':[1,2,2,1,1],
+  'ML':[2,3,2,1,1],'NE':[2,3,2,1,1],'BF':[2,2,3,1,1],'GN':[2,3,3,1,1],'SL':[2,3,3,2,1],
+  'LR':[2,3,3,2,1],'TG':[2,2,3,2,1],'BJ':[2,2,3,2,1],'MR':[2,3,1,1,1],'TD':[1,3,1,1,1],
+  'SD':[2,3,2,1,1],'SS':[1,3,2,1,1],'SO':[3,2,1,2,1],'DJ':[5,1,1,4,1],'ER':[3,1,1,2,1],
+  'CF':[1,3,2,1,1],'CG':[2,3,3,2,1],'GA':[3,3,2,2,1],'GQ':[3,4,2,2,1],'UG':[2,3,4,2,1],
+  'RW':[2,2,3,2,1],'BI':[1,1,2,1,1],'MW':[1,2,3,1,1],'TM':[2,4,1,1,1],'KG':[2,2,2,1,1],
+  'TJ':[2,2,2,1,1],'NP':[2,3,2,1,1],'BT':[2,2,2,1,1],'LA':[2,3,3,1,1],'KP':[2,3,1,1,1],
+  'MN':[2,3,1,1,1],'GT':[3,2,3,2,1],'BZ':[3,2,3,2,1],'HN':[3,2,3,2,1],'SV':[3,2,3,2,1],
+  'NI':[3,2,3,2,1],'CR':[3,2,4,3,2],'CU':[3,2,3,3,2],'HT':[3,1,2,2,1],'DO':[3,2,3,3,2],
+  'JM':[3,2,3,3,2],'YE':[3,3,1,2,1],'PS':[3,1,2,2,1],'TL':[3,3,2,2,1],'BN':[4,4,1,4,2],
+  'PG':[3,4,3,2,1],'FJ':[3,2,3,3,1],'GM':[2,1,2,2,1],'BH':[4,4,1,4,2],
+  'GL':[5,5,2,4,4]
+};
+
+const N2A2 = {
+  4:'AF',8:'AL',12:'DZ',24:'AO',32:'AR',36:'AU',40:'AT',50:'BD',56:'BE',64:'BT',68:'BO',
+  70:'BA',72:'BW',76:'BR',84:'BZ',100:'BG',104:'MM',116:'KH',120:'CM',124:'CA',140:'CF',
+  144:'LK',148:'TD',152:'CL',156:'CN',170:'CO',178:'CG',180:'CD',188:'CR',191:'HR',
+  192:'CU',204:'BJ',208:'DK',214:'DO',218:'EC',222:'SV',226:'GQ',231:'ET',232:'ER',
+  246:'FI',250:'FR',262:'DJ',266:'GA',268:'GE',276:'DE',288:'GH',300:'GR',320:'GT',
+  324:'GN',332:'HT',340:'HN',348:'HU',356:'IN',360:'ID',364:'IR',368:'IQ',372:'IE',
+  376:'IL',380:'IT',388:'JM',392:'JP',398:'KZ',400:'JO',404:'KE',408:'KP',410:'KR',
+  414:'KW',417:'KG',418:'LA',422:'LB',426:'LS',428:'LV',430:'LR',434:'LY',440:'LT',
+  450:'MG',454:'MW',458:'MY',466:'ML',478:'MR',484:'MX',496:'MN',498:'MD',499:'ME',
+  504:'MA',508:'MZ',516:'NA',524:'NP',528:'NL',554:'NZ',558:'NI',562:'NE',566:'NG',
+  578:'NO',586:'PK',591:'PA',598:'PG',600:'PY',604:'PE',608:'PH',616:'PL',620:'PT',
+  626:'TL',634:'QA',642:'RO',643:'RU',646:'RW',682:'SA',686:'SN',694:'SL',703:'SK',
+  704:'VN',706:'SO',710:'ZA',716:'ZW',724:'ES',729:'SD',740:'SR',748:'SZ',752:'SE',
+  756:'CH',760:'SY',762:'TJ',764:'TH',768:'TG',788:'TN',792:'TR',795:'TM',800:'UG',
+  804:'UA',784:'AE',807:'MK',818:'EG',826:'GB',840:'US',858:'UY',860:'UZ',862:'VE',
+  887:'YE',894:'ZM',31:'AZ',51:'AM',304:'GL',96:'BN',112:'BY',275:'PS',203:'CZ'
+};
+
+const NAMES = {
+  'AF':'Afghanistan','AL':'Albania','DZ':'Algeria','AO':'Angola','AR':'Argentina','AU':'Australia',
+  'AT':'Austria','AZ':'Azerbaijan','BD':'Bangladesh','BE':'Belgium','BZ':'Belize','BJ':'Benin',
+  'BT':'Bhutan','BO':'Bolivia','BA':'Bosnia','BW':'Botswana','BR':'Brazil','BN':'Brunei',
+  'BG':'Bulgaria','BF':'Burkina Faso','BI':'Burundi','CM':'Cameroon','CA':'Canada','CF':'C. African Rep.',
+  'TD':'Chad','CL':'Chile','CN':'China','CO':'Colombia','CG':'Congo','CD':'DR Congo',
+  'CR':'Costa Rica','HR':'Croatia','CU':'Cuba','CZ':'Czechia','DK':'Denmark','DJ':'Djibouti',
+  'DO':'Dominican Rep.','EC':'Ecuador','EG':'Egypt','SV':'El Salvador','GQ':'Eq. Guinea','ER':'Eritrea',
+  'ET':'Ethiopia','FI':'Finland','FR':'France','GA':'Gabon','GM':'Gambia','GE':'Georgia',
+  'DE':'Germany','GH':'Ghana','GR':'Greece','GT':'Guatemala','GN':'Guinea','HT':'Haiti',
+  'HN':'Honduras','HU':'Hungary','IS':'Iceland','IN':'India','ID':'Indonesia','IR':'Iran',
+  'IQ':'Iraq','IE':'Ireland','IL':'Israel','IT':'Italy','JM':'Jamaica','JP':'Japan',
+  'JO':'Jordan','KZ':'Kazakhstan','KE':'Kenya','KP':'N. Korea','KR':'S. Korea','KW':'Kuwait',
+  'KG':'Kyrgyzstan','LA':'Laos','LB':'Lebanon','LS':'Lesotho','LR':'Liberia','LY':'Libya',
+  'LT':'Lithuania','LV':'Latvia','MK':'N. Macedonia','MG':'Madagascar','MW':'Malawi',
+  'MY':'Malaysia','ML':'Mali','MR':'Mauritania','MX':'Mexico','MD':'Moldova','MN':'Mongolia',
+  'MA':'Morocco','MZ':'Mozambique','MM':'Myanmar','NA':'Namibia','NP':'Nepal','NL':'Netherlands',
+  'NZ':'New Zealand','NI':'Nicaragua','NE':'Niger','NG':'Nigeria','NO':'Norway','OM':'Oman',
+  'PK':'Pakistan','PA':'Panama','PG':'Papua New Guinea','PY':'Paraguay','PE':'Peru',
+  'PH':'Philippines','PL':'Poland','PT':'Portugal','QA':'Qatar','RO':'Romania','RU':'Russia',
+  'RW':'Rwanda','SA':'Saudi Arabia','SN':'Senegal','RS':'Serbia','SL':'Sierra Leone',
+  'SK':'Slovakia','SI':'Slovenia','SO':'Somalia','ZA':'South Africa','SS':'South Sudan',
+  'ES':'Spain','LK':'Sri Lanka','SD':'Sudan','SR':'Suriname','SZ':'Eswatini','SE':'Sweden',
+  'CH':'Switzerland','SY':'Syria','TW':'Taiwan','TJ':'Tajikistan','TZ':'Tanzania','TH':'Thailand',
+  'TL':'Timor-Leste','TG':'Togo','TN':'Tunisia','TR':'Turkey','TM':'Turkmenistan','UG':'Uganda',
+  'UA':'Ukraine','AE':'UAE','GB':'United Kingdom','US':'United States','UY':'Uruguay',
+  'UZ':'Uzbekistan','VE':'Venezuela','VN':'Vietnam','YE':'Yemen','ZM':'Zambia','ZW':'Zimbabwe',
+  'GY':'Guyana','ME':'Montenegro','AM':'Armenia','BY':'Belarus','FJ':'Fiji',
+  'PS':'Palestine','BH':'Bahrain','GL':'Greenland','CI':'Ivory Coast',
+  'EE':'Estonia','TT':'Trinidad & Tobago','BF':'Burkina Faso','SS':'S. Sudan'
+};
+
+function cval(iso){ const v=CV[iso]; return v?v.reduce((a,b)=>a+b,0):5; }
+function cname(iso){ return NAMES[iso]||iso; }
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+const SK = { OWN:'TWC2_OWN', GOLD:'TWC2_GOLD', GOVT:'TWC2_GOVT', BLOK:'TWC2_BLOK', SKIP:'TWC2_SKIP', LOG:'TWC2_LOG', NUKED:'TWC2_NUKED' };
+
+function loadState(){
+  const s={};
+  s.own   = JSON.parse(localStorage.getItem(SK.OWN) ||'{}');
+  s.gold  = JSON.parse(localStorage.getItem(SK.GOLD)||'{"1st":0,"2nd":0,"5th":0,"6th":0}');
+  s.govt  = JSON.parse(localStorage.getItem(SK.GOVT)||'{"1st":null,"2nd":null,"5th":null,"6th":null}');
+  s.blok  = JSON.parse(localStorage.getItem(SK.BLOK)||'{}');
+  s.skip  = JSON.parse(localStorage.getItem(SK.SKIP)||'{"1st":0,"2nd":0,"5th":0,"6th":0}');
+  s.nuked = JSON.parse(localStorage.getItem(SK.NUKED)||'[]');
+  s.log   = JSON.parse(localStorage.getItem(SK.LOG) ||'[]');
+  for(const c of ['1st','2nd','5th','6th']){ if(!s.gold[c])s.gold[c]=0; if(!s.skip[c])s.skip[c]=0; }
+  return s;
+}
+function saveState(){
+  localStorage.setItem(SK.OWN,  JSON.stringify(S.own));
+  localStorage.setItem(SK.GOLD, JSON.stringify(S.gold));
+  localStorage.setItem(SK.GOVT, JSON.stringify(S.govt));
+  localStorage.setItem(SK.BLOK, JSON.stringify(S.blok));
+  localStorage.setItem(SK.SKIP,  JSON.stringify(S.skip));
+  localStorage.setItem(SK.NUKED, JSON.stringify(S.nuked));
+  localStorage.setItem(SK.LOG,   JSON.stringify(S.log.slice(-50)));
+}
+
+let S = loadState();
+
+function score(cls){
+  let pts=LEGACY[cls]||0;
+  for(const [iso,owner] of Object.entries(S.own)) if(owner===cls) pts+=cval(iso);
+  return pts;
+}
+function terrCount(cls){ return Object.values(S.own).filter(o=>o===cls).length; }
+
+function addLog(msg){
+  const ts=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  S.log.unshift(`[${ts}] ${msg}`);
+  saveState();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════════════════════════
+let svg, proj, path, cpaths;
+
+async function initMap(){
+  const el=document.getElementById('map-wrap');
+  const w=el.clientWidth, h=el.clientHeight;
+  svg=d3.select('#map-svg').attr('viewBox',`0 0 ${w} ${h}`);
+  proj=d3.geoMercator().scale(w/6.4).translate([w/2,h/1.58]);
+  path=d3.geoPath().projection(proj);
+  let world;
+  try{
+    world = miniWorldCache || await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    miniWorldCache = world;
+  }
+  catch(e){ el.innerHTML='<div style="color:#ff3333;padding:30px;text-align:center;font-family:monospace">⚠️ Map failed to load — check internet</div>'; return; }
+  const countries=topojson.feature(world,world.objects.countries);
+  cpaths=svg.selectAll('.country').data(countries.features).join('path')
+    .attr('class',d=>mapCls(N2A2[parseInt(d.id)]))
+    .attr('d',path)
+    .attr('data-iso',d=>N2A2[parseInt(d.id)]||'')
+    .on('mouseover',mapOver).on('mousemove',mapMove).on('mouseout',mapOut).on('click',mapClick);
+  svg.append('path').datum(topojson.mesh(world,world.objects.countries,(a,b)=>a!==b))
+    .attr('fill','none').attr('stroke','#4a6060').attr('stroke-width',.4).attr('d',path);
+}
+
+function mapCls(iso){
+  if(iso&&S.nuked&&S.nuked.includes(iso)) return 'country country-nuked';
+  const owner=iso?S.own[iso]:null;
+  let c='country '+(owner?CLS[owner].mapCls:'country-unclaimed');
+  if(iso&&S.blok[iso]&&new Date()<new Date(S.blok[iso])) c+=' country-skipped';
+  return c;
+}
+function refreshMap(){ if(cpaths) cpaths.attr('class',d=>mapCls(N2A2[parseInt(d.id)])); }
+
+function mapOver(event,d){
+  const iso=N2A2[parseInt(d.id)]; if(!iso) return;
+  const owner=S.own[iso]; const pts=cval(iso);
+  const tt=document.getElementById('tt');
+  tt.innerHTML=`<strong>${cname(iso)}</strong> [${iso}] &nbsp; <span style="color:#ffff00">${pts} pts</span><br><span style="color:${owner?CLS[owner].color:'#555'}">${owner?CLS[owner].name:'Unclaimed'}</span>`;
+  tt.style.display='block';
+}
+function mapMove(event){ const tt=document.getElementById('tt'); tt.style.left=(event.clientX+12)+'px'; tt.style.top=(event.clientY+8)+'px'; }
+function mapOut(){ document.getElementById('tt').style.display='none'; }
+
+function mapClick(event,d){
+  const iso=N2A2[parseInt(d.id)]; if(!iso) return;
+  const owner=S.own[iso];
+  const v=CV[iso]||[1,1,1,1,1];
+  const labels=['📍 Location','🌋 Place','🌱 H-E Int.','🚢 Movement','🌍 Region'];
+  const el=document.getElementById('map-country-info');
+  el.style.display='block';
+  el.innerHTML=`<strong style="color:#ffff00;font-size:1.1em">${cname(iso)}</strong>
+    <span style="color:#888;font-size:.85em"> [${iso}]</span>
+    <span style="background:${owner?CLS[owner].color:'#333'};color:#fff;padding:1px 8px;font-size:.75em;margin-left:8px">${owner?CLS[owner].name:'UNCLAIMED'}</span><br>
+    <div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    ${v.map((n,i)=>`<span style="color:#aaa;font-size:.72em">${labels[i]}: <span style="color:#ffff00">${n}</span></span>`).join('')}
+    </div>
+    <div style="margin-top:4px;color:#ffff00;font-weight:700">🌐 Total: ${v.reduce((a,b)=>a+b,0)} pts</div>`;
+  document.getElementById('ctrl-iso').value=iso;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LEADERBOARD RENDER
+// ═══════════════════════════════════════════════════════════════════
+function renderLB(){
+  const rows=['1st','2nd','5th','6th']
+    .map(c=>({c,s:score(c),t:terrCount(c)}))
+    .sort((a,b)=>b.s-a.s);
+  const emojis=['🥇','🥈','🥉','4️⃣'];
+
+  // Teacher sidebar
+  let th='';
+  rows.forEach((r,i)=>{
+    const cl=CLS[r.c], g=S.govt[r.c], sk=S.skip[r.c]||0;
+    th+=`<div class="lb-row">
+      <span style="width:22px;text-align:center;flex-shrink:0">${emojis[i]}</span>
+      <div class="lb-dot" style="background:${cl.color};width:14px;height:14px;border-radius:50%;flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;color:${cl.color};white-space:nowrap">${cl.name}</div>
+        <div style="font-size:.68em;color:#888;white-space:nowrap">${r.t} terr.${sk>0?` <span class="skip-badge">⏸${sk}</span>`:''} ${g?`· ${GOVTS[g].icon}`:'·❓'}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;font-size:.78em">
+        <div style="color:#ffd700;font-weight:700">$${(S.gold[r.c]||0).toLocaleString()}</div>
+        <div style="color:var(--yellow);font-weight:700;font-size:1.05em">${r.s.toLocaleString()} pts</div>
+      </div>
+    </div>`;
+  });
+  const tlb=document.getElementById('t-lb');
+  if(tlb) tlb.innerHTML=th;
+
+  // Student table
+  let sh='<thead><tr><th></th><th>CLASS</th><th>TERR.</th><th>PTS</th><th>STATUS</th></tr></thead><tbody>';
+  rows.forEach((r,i)=>{
+    const cl=CLS[r.c], g=S.govt[r.c], sk=S.skip[r.c]||0;
+    sh+=`<tr class="${i===0?'rank-1':''}">
+      <td>${emojis[i]}</td>
+      <td style="color:${cl.color}">${cl.emoji} ${cl.name}</td>
+      <td>${r.t}</td>
+      <td><strong>${r.s.toLocaleString()}</strong></td>
+      <td>${g?`<span class="govt-badge">${GOVTS[g].icon}</span>`:'-'}${sk>0?`<span class="skip-badge">⏸${sk}</span>`:''}</td>
+    </tr>`;
+  });
+  sh+='</tbody>';
+  const slb=document.getElementById('s-leaderboard');
+  if(slb) slb.innerHTML=sh;
+}
+
+let _currentStudentCls = '1st';
+function renderStudentView(period){
+  _currentStudentCls = period;
+  const cls=['1st','2nd','5th','6th'].find(c=>parseInt(c)===period)||'1st';
+  const cl=CLS[cls];
+  document.getElementById('s-subhead').textContent=`Period ${period} · ${cl.name} EMPIRE`;
+  document.getElementById('s-header').style.background=cl.color;
+
+  const sk=S.skip[cls]||0;
+  let stats=`
+    <div class="stat-line">Legacy Points <span class="stat-val">${LEGACY[cls]}</span></div>
+    <div class="stat-line">Territory Points <span class="stat-val">${score(cls)-LEGACY[cls]}</span></div>
+    <div class="stat-line">Total Score <span class="stat-val">${score(cls)}</span></div>
+    <div class="stat-line">Territories <span class="stat-val">${terrCount(cls)}</span></div>
+    <div class="stat-line">Gold <span class="stat-val">$${(S.gold[cls]||0).toLocaleString()}</span></div>
+    ${sk>0?`<div class="stat-line" style="color:#ff3333">⏸ TURNS SKIPPED <span class="stat-val" style="color:#ff3333">${sk}</span></div>`:''}
+  `;
+  document.getElementById('s-stats').innerHTML=stats;
+
+  const govt=S.govt[cls];
+  document.getElementById('s-govt').innerHTML=govt
+    ?`<span class="govt-badge" style="font-size:.9em">${GOVTS[govt].icon} ${govt}</span><br><span style="color:#aaa;font-size:.8em">${GOVTS[govt].desc}</span>`
+    :'<span style="color:#555">Not yet assigned</span>';
+
+  const logEl=document.getElementById('s-log');
+  if(logEl) logEl.innerHTML=S.log.map(l=>`<div style="margin-bottom:3px;border-bottom:1px dashed #1a2a1a;padding-bottom:2px">${l}</div>`).join('')||'<span style="color:#555">No battles yet</span>';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TEACHER PANEL RENDERS
+// ═══════════════════════════════════════════════════════════════════
+function renderTeacherUI(){
+  // Govt
+  let gh='';
+  for(const c of ['1st','2nd','5th','6th']){
+    const cl=CLS[c];
+    gh+=`<div style="margin-bottom:6px">
+      <div style="font-size:.8em;font-weight:700;color:${cl.color};margin-bottom:2px">${cl.emoji} ${cl.name}</div>
+      <div class="ctrl-row">
+        <select class="ctrl-select" style="flex:1" id="govt-${c}" onchange="setGovt('${c}',this.value)">
+          <option value="">— Not Set —</option>
+          ${Object.entries(GOVTS).map(([k,v])=>`<option value="${k}" ${S.govt[c]===k?'selected':''}>${v.icon} ${k}</option>`).join('')}
+        </select>
+      </div>
+      ${S.govt[c]?`<div style="font-size:.68em;color:#888;margin-top:2px">${GOVTS[S.govt[c]].desc}</div>`:''}
+    </div>`;
+  }
+  document.getElementById('govt-rows').innerHTML=gh;
+
+  // Gold
+  let gg='';
+  for(const c of ['1st','2nd','5th','6th']){
+    const cl=CLS[c];
+    gg+=`<div class="gold-row">
+      <span style="color:${cl.color};font-weight:700;width:60px">${cl.emoji} ${c}</span>
+      <span class="gold-amt">$${(S.gold[c]||0).toLocaleString()}</span>
+      <button class="retro-btn sm" onclick="addGold('${c}',50)">+50</button>
+      <button class="retro-btn sm" onclick="addGold('${c}',100)">+100</button>
+      <button class="retro-btn sm" onclick="addGold('${c}',200)">+200</button>
+    </div>`;
+  }
+  document.getElementById('gold-rows').innerHTML=gg;
+
+  renderLB();
+  const nukedCount=(S.nuked||[]).length;
+  document.getElementById('t-date').textContent=new Date().toLocaleDateString()+(nukedCount>0?` · ☢️ ${nukedCount} nuked`:'');
+}
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// TEACHER ACTIONS
+// ═══════════════════════════════════════════════════════════════════
+function claimTerritory(){
+  const iso=document.getElementById('ctrl-iso').value.trim().toUpperCase();
+  const cls=document.getElementById('ctrl-class').value;
+  if(!iso){ alert('Enter a country ISO code'); return; }
+  if(S.nuked&&S.nuked.includes(iso)){ alert(`☢️ ${cname(iso)} was nuked — it is permanently destroyed and cannot be claimed!`); return; }
+  if(cls) S.own[iso]=cls;
+  else delete S.own[iso];
+  saveState(); refreshMap(); renderLB();
+  addLog(`🗺️ ${cname(iso)} → ${cls?CLS[cls].name:'Unclaimed'}`);
+  alert(`✅ ${cname(iso)} set to ${cls?CLS[cls].name:'Unclaimed'}`);
+}
+
+function setGovt(cls, govt){
+  S.govt[cls]=govt||null;
+  if(govt==='Oligarchy'&&!S.gold[cls+'_olg']){
+    S.gold[cls]=(S.gold[cls]||0)+500;
+    S.gold[cls+'_olg']=true;
+    addLog(`💰 ${CLS[cls].name} selected Oligarchy — +$500 bonus!`);
+  }
+  saveState(); renderTeacherUI();
+  addLog(`🏛️ ${CLS[cls].name} government → ${govt||'none'}`);
+}
+
+function addGold(cls, amount){
+  S.gold[cls]=(S.gold[cls]||0)+amount;
+  saveState(); renderTeacherUI();
+  addLog(`💰 ${CLS[cls].name} received +$${amount} gold`);
+}
+
+// ─── EXPORT / IMPORT / RESET ───
+function openExportModal(){
+  const data={exported:new Date().toISOString(),state:{[SK.OWN]:JSON.stringify(S.own),[SK.GOLD]:JSON.stringify(S.gold),[SK.GOVT]:JSON.stringify(S.govt),[SK.BLOK]:JSON.stringify(S.blok),[SK.SKIP]:JSON.stringify(S.skip),[SK.LOG]:JSON.stringify(S.log),[SK.NUKED]:JSON.stringify(S.nuked)}};
+  document.getElementById('export-ta').value = JSON.stringify(data,null,2);
+  document.getElementById('export-copy-msg').textContent='';
+  document.getElementById('export-modal').classList.add('open');
+}
+function selectExportAll(){
+  const ta=document.getElementById('export-ta');
+  ta.select(); ta.setSelectionRange(0,99999);
+}
+function copyExportText(){
+  const ta=document.getElementById('export-ta');
+  ta.select(); ta.setSelectionRange(0,99999);
+  try{
+    document.execCommand('copy');
+    document.getElementById('export-copy-msg').textContent='✅ Copied! Paste into a .txt file and save it.';
+  }catch(e){
+    document.getElementById('export-copy-msg').textContent='⚠️ Press Ctrl+C / Cmd+C to copy.';
+  }
+}
+
+function openImportModal(){
+  document.getElementById('import-ta').value='';
+  document.getElementById('import-msg').textContent='';
+  document.getElementById('import-modal').classList.add('open');
+}
+function importFromText(){
+  const text=document.getElementById('import-ta').value.trim();
+  const msgEl=document.getElementById('import-msg');
+  if(!text){ msgEl.style.color='red'; msgEl.textContent='❌ Paste your save data first.'; return; }
+  try{
+    const data=JSON.parse(text);
+    const st=data.state||data;
+    for(const[k,v] of Object.entries(st)) localStorage.setItem(k,v);
+    S=loadState();
+    refreshMap();
+    renderLB();
+    renderTeacherUI();
+    startBlockadeTicker();
+    msgEl.style.color='green';
+    msgEl.textContent='✅ Loaded! All territories and gold restored.';
+    setTimeout(()=>closeModal('import-modal'),1500);
+  }catch(err){
+    msgEl.style.color='red';
+    msgEl.textContent='❌ Invalid save data: '+err.message;
+  }
+}
+
+function doReset(){
+  for(const k of Object.values(SK)) localStorage.removeItem(k);
+  S=loadState();
+  refreshMap();
+  renderLB();
+  renderTeacherUI();
+  addLog('🗑️ Game was reset by teacher.');
+  alert('✅ Game reset complete. All empires start fresh.');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BLOCKADE COUNTDOWN TICKER
+// ═══════════════════════════════════════════════════════════════════
+let blockadeTickerInterval = null;
+
+function startBlockadeTicker(){
+  if(blockadeTickerInterval) clearInterval(blockadeTickerInterval);
+  renderBlockadeTicker();
+  blockadeTickerInterval = setInterval(renderBlockadeTicker, 1000);
+}
+
+function renderBlockadeTicker(){
+  const ticker = document.getElementById('blockade-ticker');
+  const listEl = document.getElementById('blockade-list');
+  if(!ticker) return;
+
+  const now = Date.now();
+  const active = Object.entries(S.blok)
+    .map(([iso, expStr]) => ({ iso, exp: new Date(expStr).getTime() }))
+    .filter(b => b.exp > now)
+    .sort((a,b) => a.exp - b.exp);
+
+  let changed = false;
+  Object.entries(S.blok).forEach(([iso, expStr]) => {
+    if(new Date(expStr).getTime() <= now){ delete S.blok[iso]; changed = true; }
+  });
+  if(changed){ saveState(); refreshMap(); renderLB(); }
+
+  if(!active.length){
+    ticker.innerHTML = '';
+    if(listEl) listEl.innerHTML = '<span style="color:#444">No active blockades</span>';
+    return;
+  }
+
+  ticker.innerHTML = active.map(b => {
+    const ms = b.exp - now;
+    const days  = Math.floor(ms / 86400000);
+    const hours = Math.floor((ms % 86400000) / 3600000);
+    const mins  = Math.floor((ms % 3600000)  / 60000);
+    const secs  = Math.floor((ms % 60000)    / 1000);
+    const timeStr = days > 0 ? `${days}d ${hours}h ${mins}m` : hours > 0 ? `${hours}h ${mins}m ${secs}s` : `${mins}m ${secs}s`;
+    return `<div class="blok-chip">🚧 <strong>${cname(b.iso)}</strong> ${timeStr}</div>`;
+  }).join('');
+
+  if(listEl) listEl.innerHTML = active.map(b => {
+    const ms = b.exp - now;
+    const days  = Math.floor(ms / 86400000);
+    const hours = Math.floor((ms % 86400000) / 3600000);
+    const mins  = Math.floor((ms % 3600000)  / 60000);
+    const secs  = Math.floor((ms % 60000)    / 1000);
+    const timeStr = days > 0 ? `${days}d ${hours}h ${mins}m` : hours > 0 ? `${hours}h ${mins}m ${secs}s` : `${mins}m ${secs}s`;
+    return `<span style="color:#ff9933">🚧 ${cname(b.iso)} [${b.iso}]</span> — <span style="color:#ffcc00">${timeStr}</span><br>`;
+  }).join('');
+}
+
+function liftBlockade(){
+  const iso = document.getElementById('lift-iso').value.trim().toUpperCase();
+  if(!iso){ alert('Enter a country ISO code'); return; }
+  if(!S.blok[iso]){ alert(`${cname(iso)} has no active blockade.`); return; }
+  if(!confirm(`Lift blockade on ${cname(iso)}?`)) return;
+  delete S.blok[iso];
+  saveState(); refreshMap(); renderBlockadeTicker();
+  addLog(`🚧 Blockade on ${cname(iso)} manually lifted.`);
+  document.getElementById('lift-iso').value = '';
+  alert(`✅ Blockade on ${cname(iso)} lifted.`);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MINI MAP (student read-only)
+// ═══════════════════════════════════════════════════════════════════
+let miniSvg, miniProj, miniPath, miniCpaths, miniWorldCache, miniRefreshTimer;
+
+async function initMiniMap(){
+  const wrap = document.getElementById('mini-map-wrap');
+  if(!wrap) return;
+  const w = wrap.offsetWidth || Math.floor(window.innerWidth * 0.45) || 500;
+  const h = wrap.offsetHeight || 420;
+
+  miniSvg = d3.select('#mini-map-svg').attr('viewBox', `0 0 ${w} ${h}`).attr('width','100%').attr('height',h);
+  miniProj = d3.geoMercator().scale(w/6.4).translate([w/2, h/1.58]);
+  miniPath = d3.geoPath().projection(miniProj);
+
+  miniSvg.selectAll('*').remove();
+
+  if(!miniWorldCache){
+    try{
+      miniWorldCache = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    } catch(e){
+      const el = document.getElementById('mini-last-update');
+      if(el) el.textContent = 'Map unavailable';
+      return;
+    }
+  }
+
+  const countries = topojson.feature(miniWorldCache, miniWorldCache.objects.countries);
+  miniCpaths = miniSvg.selectAll('.mini-country')
+    .data(countries.features)
+    .join('path')
+    .attr('class', d => miniMapCls(N2A2[parseInt(d.id)]))
+    .attr('d', miniPath);
+
+  miniSvg.append('path')
+    .datum(topojson.mesh(miniWorldCache, miniWorldCache.objects.countries, (a,b)=>a!==b))
+    .attr('fill','none').attr('stroke','#0d1224').attr('stroke-width',.3)
+    .attr('d', miniPath);
+
+  updateMiniTimestamp();
+  if(miniRefreshTimer) clearInterval(miniRefreshTimer);
+  miniRefreshTimer = setInterval(()=>refreshMiniMap(true), 30000);
+}
+
+function miniMapCls(iso){
+  if(!iso) return 'mini-country mini-unclaimed';
+  if(S.nuked && S.nuked.includes(iso)) return 'mini-country mini-nuked';
+  const owner = S.own[iso];
+  return 'mini-country ' + (owner ? 'mini-'+owner : 'mini-unclaimed');
+}
+
+function refreshMiniMap(silent){
+  S = loadState();
+  if(miniCpaths) miniCpaths.attr('class', d => miniMapCls(N2A2[parseInt(d.id)]));
+  updateMiniTimestamp();
+  if(!silent){
+    const btn = document.getElementById('mini-refresh');
+    if(btn){ btn.textContent='✓ Updated'; setTimeout(()=>btn.textContent='↻ REFRESH',1500); }
+  }
+}
+
+function updateMiniTimestamp(){
+  const el = document.getElementById('mini-last-update');
+  if(!el) return;
+  const now = Date.now();
+  const active = Object.entries(S.blok).filter(([,e])=>new Date(e).getTime()>now);
+  const blokStr = active.length ? ` · 🚧 ${active.length} blockade${active.length>1?'s':''}` : '';
+  el.textContent = 'Updated: '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+blokStr;
+}
+
+function stopMiniMap(){
+  if(miniRefreshTimer){ clearInterval(miniRefreshTimer); miniRefreshTimer=null; }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NAVIGATION + PIN
+// ═══════════════════════════════════════════════════════════════════
+const PIN='1449';
+
+function goLogin(){ stopMiniMap(); show('login-screen'); }
+
+function goStudent(period){
+  show('student-screen');
+  renderLB();
+  renderStudentView(period);
+  setTimeout(()=>initMiniMap(), 100);
+}
+
+function goTeacher(){
+  show('teacher-screen');
+  initMap().then(()=>{
+    renderTeacherUI();
+    startBlockadeTicker();
+    loadBCBInbox();
+  });
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function openPinModal(){
+  _pinMode='teacher';
+  document.getElementById('pin-in').value='';
+  document.getElementById('pin-err').textContent='';
+  document.getElementById('pin-modal-title').textContent='🔐 TEACHER ACCESS';
+  document.getElementById('pin-modal-desc').textContent='Enter PIN to access controls';
+  document.getElementById('pin-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('pin-in').focus(),100);
+}
+
+let _pinMode = 'teacher';
+
+function checkPin(){
+  if(document.getElementById('pin-in').value===PIN){
+    closeModal('pin-modal');
+    if(_pinMode==='reset'){
+      _pinMode='teacher';
+      doReset();
+    } else {
+      _pinMode='teacher';
+      goTeacher();
+    }
+  } else {
+    document.getElementById('pin-err').textContent='❌ Incorrect PIN';
+    document.getElementById('pin-in').value='';
+  }
+}
+
+function openResetPin(){
+  _pinMode='reset';
+  document.getElementById('pin-in').value='';
+  document.getElementById('pin-err').textContent='';
+  document.getElementById('pin-modal-title').textContent='🗑️ CONFIRM RESET';
+  document.getElementById('pin-modal-desc').textContent='Enter teacher PIN to wipe all game data.';
+  document.getElementById('pin-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('pin-in').focus(),100);
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-bg').forEach(bg=>{
+  bg.addEventListener('click',e=>{ if(e.target===bg) closeModal(bg.id); });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  const now=new Date();
+  let changed=false;
+  for(const[iso,exp] of Object.entries(S.blok)) if(new Date(exp)<now){ delete S.blok[iso]; changed=true; }
+  if(changed) saveState();
+});
+
+window.addEventListener('resize',()=>{
+  const el=document.getElementById('map-wrap');
+  if(!svg||!el) return;
+  const w=el.clientWidth, h=el.clientHeight;
+  svg.attr('viewBox',`0 0 ${w} ${h}`);
+  proj.scale(w/6.4).translate([w/2,h/1.58]);
+  path.projection(proj);
+  if(cpaths) cpaths.attr('d',path);
+});
+</script>
+
+<!-- FAQ MODAL -->
+<div id="faq-modal">
+  <div class="faq-box">
+    <div class="faq-header">
+      <h2>❓ GAME HELP &amp; FAQ</h2>
+      <button class="retro-btn sm secondary" onclick="closeFAQ()">✕ CLOSE</button>
+    </div>
+    <div class="faq-tabs" id="faq-tabs"></div>
+    <div class="faq-content" id="faq-content"></div>
+    <div class="faq-footer">Total World Conquest: Modern Era · © 2026 Jason Slaughter · PixelED Path, LLC</div>
+  </div>
+</div>
+
+<!-- COUNTRY LIST MODAL -->
+<div id="country-list-modal">
+  <div class="cl-box">
+    <div class="cl-header">
+      <h2>🌍 ALL COUNTRIES &amp; CODES</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="cl-search" id="cl-search" placeholder="Search country..." oninput="filterCountries(this.value)">
+        <button class="retro-btn sm secondary" onclick="document.getElementById('country-list-modal').classList.remove('open')">✕ CLOSE</button>
+      </div>
+    </div>
+    <div class="cl-body" id="cl-body"></div>
+    <div class="cl-footer">
+      <span class="cl-legend"><span style="display:inline-block;width:10px;height:10px;border-left:3px solid #d94141;margin-right:3px"></span>1st Hour</span>
+      <span class="cl-legend"><span style="display:inline-block;width:10px;height:10px;border-left:3px solid #2ea44f;margin-right:3px"></span>2nd Hour</span>
+      <span class="cl-legend"><span style="display:inline-block;width:10px;height:10px;border-left:3px solid #f2c94c;margin-right:3px"></span>5th Hour</span>
+      <span class="cl-legend"><span style="display:inline-block;width:10px;height:10px;border-left:3px solid #2f6fed;margin-right:3px"></span>6th Hour</span>
+      <span class="cl-legend"><span style="color:#888">pts = 5-Themes score</span></span>
+    </div>
+  </div>
+</div>
+<div style="display:none">© 2026 Jason Slaughter · PixelED Path, LLC · Total World Conquest: Modern Era</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// FAQ SYSTEM
+// ═══════════════════════════════════════════════════════════════════
+const FAQ_DB = {
+  'Getting Started': [
+    {
+      q: 'What is Total World Conquest?',
+      a: 'Total World Conquest is a classroom strategy game where each class period (1st, 2nd, 5th, 6th) represents an empire trying to control as many countries as possible. Each territory you own earns points based on real-world geography factors. The class with the most points wins!'
+    },
+    {
+      q: 'How do class periods play?',
+      a: '1st Hour = 🔴 Red Empire\n2nd Hour = 🟢 Green Empire\n5th Hour = 🟡 Yellow Empire\n6th Hour = 🔵 Blue Empire\n\nEach period plays together as one team. Your leader makes the big decisions, but the whole class votes and strategizes.'
+    },
+    {
+      q: 'What are Legacy Points?',
+      a: 'Legacy Points are the scores carried over from the Ancient World era of Total World Conquest. These are permanent bonuses:\n\n🟢 2nd Hour: 348 pts\n🔵 6th Hour: 293 pts\n🟡 5th Hour: 165 pts\n🔴 1st Hour: 56 pts\n\nNew territory points are added on top of these totals.'
+    },
+    {
+      q: 'How are territory points calculated?',
+      a: 'Every country is scored using the 5 Themes of Geography (1–5 each, max 25 pts):\n\n📍 Location — Strategic chokepoints (Suez Canal, Panama, Singapore)\n🌋 Place — Natural resources, oil, rare earth minerals, HDI\n🌱 Human-Environment Interaction — Arable land, water access, climate\n🚢 Movement — Ports, trade routes, infrastructure\n🌍 Region — GDP, geopolitical alliances, global influence\n\nClick any country on the map to see its full breakdown.'
+    },
+    {
+      q: 'How does my class earn gold?',
+      a: 'Gold is awarded by Mr. Slaughter through participation stamps. When you earn a stamp in class for participating, contributing, or demonstrating good behavior, that stamp converts to gold for your class.'
+    },
+  ],
+
+  'Government & Leadership': [
+    {
+      q: 'What is a government type and why does it matter?',
+      a: 'Your class votes on a government type, which gives your empire a permanent special bonus for the rest of the game.\n\n🗳️ Democracy — +1 to ALL defense rolls\n📜 Republic — Claim 1 extra territory per turn\n👑 Monarchy — Immune to Nuclear Warhead & Cyber Attack (Divine Right)\n✊ Dictatorship — Airborne Rangers cost only $50\n🔒 Authoritarianism — Blockades last 2 weeks instead of 1\n⚡ Totalitarianism — +3 to attack rolls, but -1 to defense\n💰 Oligarchy — Receive +$500 bonus gold immediately upon selection\n✝️ Theocracy — Immune to Cyber Attack'
+    },
+    {
+      q: 'How does leadership work?',
+      a: 'Each class elects:\n\n👑 Leader — Makes all final game decisions\n⚔️ Military General — Rolls the d20 against Mr. Slaughter\n🗺️ Cartographer — Tracks territory acquisitions'
+    },
+  ],
+
+  'Claiming Territories': [
+    {
+      q: 'How do we claim a new territory?',
+      a: 'On your turn, your leader can choose to claim any UNCLAIMED territory (shown in gray on the map). Mr. Slaughter updates the map. No dice roll needed — unclaimed land is free to take.\n\nRepublics can claim 2 territories per turn instead of 1.'
+    },
+    {
+      q: 'What countries are worth the most points?',
+      a: 'High-value territories:\n\n🇺🇸 United States — 25 pts\n🇨🇳 China — 24 pts\n🇷🇺 Russia — 22 pts\n🇩🇪 Germany — 22 pts\n🇬🇧 United Kingdom — 22 pts\n🇮🇳 India — 20 pts\n🇯🇵 Japan — 19 pts\n🇸🇦 Saudi Arabia — 18 pts\n\nClick any country on the map to see its exact score breakdown.'
+    },
+    {
+      q: 'What are chokepoints and why are they valuable?',
+      a: 'Chokepoints are narrow geographic passages that control massive amounts of global trade:\n\n🇪🇬 Egypt — Suez Canal\n🇵🇦 Panama — Panama Canal\n🇹🇷 Turkey — Bosphorus Strait\n🇸🇬 Singapore — Malacca Strait (40% of world trade)\n🇩🇯 Djibouti — Horn of Africa/Red Sea\n🇴🇲 Oman — Strait of Hormuz (oil shipping)'
+    },
+  ],
+
+  'Battle & War': [
+    {
+      q: 'How does attacking work?',
+      a: 'To attack an enemy territory:\n1. Your Military General rolls a d20\n2. Mr. Slaughter rolls a d20 for the defender\n3. Both sides add their modifiers (government bonuses)\n4. Highest total wins. TIES always go to the DEFENDER.\n5. Mr. Slaughter updates the map if the attacker wins.'
+    },
+    {
+      q: 'Can we attack any territory?',
+      a: 'Standard attacks require a NEIGHBORING (bordering) territory — your empire must share a border or coastline with the target.'
+    },
+  ],
+
+  'Diplomacy & Alliances': [
+    {
+      q: 'Can classes form alliances?',
+      a: 'Absolutely! Two classes can agree not to attack each other, coordinate which territories to claim, or help defend against a common enemy.\n\nAlliances are not enforced by the game — they run on trust. Betraying an alliance is allowed but your reputation with other classes will suffer.'
+    },
+    {
+      q: 'What is the best strategy for winning?',
+      a: '1. 🌍 Focus on HIGH-VALUE territories early (US, China, Russia, Germany)\n2. 🤝 Form an alliance when you\'re losing\n3. 🏛️ Choose your government carefully based on your playstyle\n4. 🗺️ Control chokepoints — Panama, Suez, Singapore give huge points for their size'
+    },
+  ],
+
+  'Map & Geography': [
+    {
+      q: 'How do I read the map?',
+      a: 'Colors show ownership:\n\n🔴 Red = 1st Hour\n🟢 Green = 2nd Hour\n🟡 Yellow = 5th Hour\n🔵 Blue = 6th Hour\n⬜ Gray = Unclaimed (free to take)\n⬛ Dark/Scorched = Nuked (permanently destroyed)\n🔶 Dashed border = Blockaded\n\nClick "View All Countries & Codes" for a full list organized by region.'
+    },
+    {
+      q: 'How does the student mini-map work?',
+      a: 'The mini-map on your student dashboard mirrors the teacher\'s map. Hit ↻ REFRESH to pull the latest update, or wait — it auto-refreshes every 30 seconds. The timestamp shows the last update time.'
+    },
+  ],
+
+  'Scoring & Winning': [
+    {
+      q: 'How is the final score calculated?',
+      a: 'Final Score = Legacy Points + Territory Points\n\nLegacy Points = Your score from the Ancient World era (locked in)\nTerritory Points = Sum of all 5-Themes scores for every country you own\n\nThe leaderboard updates live every time Mr. Slaughter claims or changes a territory.'
+    },
+    {
+      q: 'When does the game end?',
+      a: 'Mr. Slaughter sets the end date. The class with the highest total score at the end date wins!'
+    },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// COUNTRY LIST MODAL
+// ═══════════════════════════════════════════════════════════════════
+const REGIONS = {
+  'North America':  ['US','CA','MX','GT','BZ','SV','HN','NI','CR','PA','CU','JM','HT','DO','TT'],
+  'South America':  ['CO','VE','GY','SR','BR','EC','PE','BO','PY','AR','UY','CL'],
+  'Western Europe': ['GB','IE','FR','ES','PT','BE','NL','DE','AT','CH','IT'],
+  'Northern Europe':['NO','SE','FI','DK','IS','EE','LV','LT','PL','CZ','SK','HU','RO','BG','HR','SI','RS','BA','ME','MK','AL'],
+  'Eastern Europe': ['RU','UA','BY','MD','GE','AM','AZ'],
+  'Middle East':    ['TR','SY','LB','IL','JO','IQ','IR','SA','KW','QA','AE','BH','OM','YE'],
+  'Africa':         ['MA','DZ','TN','LY','EG','SD','SS','ET','ER','DJ','SO','KE','UG','TZ','RW','BI','MZ','ZW','ZM','MW','AO','CD','CG','GA','CM','NG','GH','CI','SN','GM','GN','SL','LR','BF','ML','NE','TD','CF','MG'],
+  'Central Asia':   ['KZ','UZ','TM','TJ','KG','AF','PK'],
+  'South Asia':     ['IN','BD','LK','NP','BT'],
+  'East Asia':      ['CN','JP','KR','KP','MN','GL'],
+  'Southeast Asia': ['MM','TH','LA','KH','VN','PH','MY','ID','BN','TL'],
+  'Oceania':        ['AU','NZ','PG','FJ'],
+};
+
+let _allCountryItems = [];
+
+function openCountryList(){
+  S = loadState();
+  const modal = document.getElementById('country-list-modal');
+  modal.classList.add('open');
+  _buildCountryList();
+  document.getElementById('cl-search').value = '';
+  document.getElementById('cl-search').focus();
+}
+
+function _buildCountryList(){
+  _allCountryItems = [];
+  let html = '';
+  for(const [region, isos] of Object.entries(REGIONS)){
+    html += `<div class="cl-region"><div class="cl-region-title">${region}</div><div class="cl-region-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px">`;
+    for(const iso of isos){
+      const owner = S.own[iso];
+      const pts = cval(iso);
+      const nuked = (S.nuked||[]).includes(iso);
+      const ownerClass = owner ? `owned-${owner}` : '';
+      const nukedClass = nuked ? 'nuked' : '';
+      const ownerLabel = owner ? `<span style="color:${CLS[owner].color};font-size:.7em">${CLS[owner].emoji}</span>` : '';
+      _allCountryItems.push({ iso, name: cname(iso), pts, owner, nuked, region });
+      html += `<div class="cl-item ${ownerClass} ${nukedClass}" data-iso="${iso}">
+        <span class="cl-code">${iso}</span>
+        <span style="flex:1">${cname(iso)}</span>
+        ${ownerLabel}
+        <span style="color:#555;font-size:.75em">${pts}pt</span>
+      </div>`;
+    }
+    html += '</div></div>';
+  }
+  document.getElementById('cl-body').innerHTML = html;
+}
+
+function filterCountries(query){
+  const q = query.trim().toLowerCase();
+  document.querySelectorAll('#cl-body .cl-item').forEach(el => {
+    const iso = el.dataset.iso || '';
+    const name = (el.querySelector('span:nth-child(2)')||{}).textContent||'';
+    const match = !q || iso.toLowerCase().includes(q) || name.toLowerCase().includes(q);
+    el.style.display = match ? '' : 'none';
+  });
+  document.querySelectorAll('#cl-body .cl-region').forEach(reg => {
+    const visible = [...reg.querySelectorAll('.cl-item')].some(el => el.style.display !== 'none');
+    reg.style.display = visible ? '' : 'none';
+  });
+}
+
+function openFAQ(category){
+  const modal = document.getElementById('faq-modal');
+  modal.classList.add('open');
+  renderFAQ(category || Object.keys(FAQ_DB)[0]);
+}
+
+function closeFAQ(){
+  document.getElementById('faq-modal').classList.remove('open');
+}
+
+function renderFAQ(activeCategory){
+  const tabs = document.getElementById('faq-tabs');
+  tabs.innerHTML = Object.keys(FAQ_DB).map(cat =>
+    `<button class="faq-tab ${cat===activeCategory?'active':''}" onclick="renderFAQ('${cat}')">${cat}</button>`
+  ).join('');
+
+  const items = FAQ_DB[activeCategory] || [];
+  const content = document.getElementById('faq-content');
+  content.innerHTML = items.map((item, i) =>
+    `<div class="faq-item" id="faq-item-${i}">
+      <div class="faq-q" onclick="toggleFAQ(${i})">
+        <span class="faq-arrow" id="faq-arrow-${i}">▶</span>
+        ${item.q}
+      </div>
+      <div class="faq-a" id="faq-a-${i}">${item.a.replace(/\n/g,'<br>')}</div>
+    </div>`
+  ).join('');
+}
+
+function toggleFAQ(i){
+  const ans = document.getElementById('faq-a-'+i);
+  const arr = document.getElementById('faq-arrow-'+i);
+  const open = ans.classList.toggle('open');
+  arr.textContent = open ? '▼' : '▶';
+  arr.style.color = open ? 'var(--yellow)' : '';
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const fm = document.getElementById('faq-modal');
+  if(fm) fm.addEventListener('click', e=>{ if(e.target===fm) closeFAQ(); });
+  const cl = document.getElementById('country-list-modal');
+  if(cl) cl.addEventListener('click', e=>{ if(e.target===cl) cl.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// FIREBASE INTEGRATION
+// ═══════════════════════════════════════════════════════════════════
+const FB_URL = 'https://minigolf-fd9ea-default-rtdb.firebaseio.com';
+
+async function publishToFirebase(){
+  const msgEl = document.getElementById('fb-pub-msg');
+  msgEl.textContent = '📡 Publishing...';
+  const payload = {
+    own:   S.own,
+    gold:  S.gold,
+    govt:  S.govt,
+    blok:  S.blok,
+    skip:  S.skip,
+    nuked: S.nuked,
+    log:   S.log.slice(-30),
+    published: Date.now()
+  };
+  try {
+    const r = await fetch(FB_URL+'/twc_state.json', {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if(r.ok){
+      msgEl.textContent = '✅ Published! '+new Date().toLocaleTimeString();
+      setTimeout(()=>msgEl.textContent='',5000);
+      addLog('📡 Game state published to student dashboards.');
+    } else {
+      msgEl.textContent = '⚠️ Firebase error '+r.status;
+    }
+  } catch(e){
+    msgEl.textContent = '⚠️ Network error: '+e.message;
+  }
+}
+
+// ── BCB RANGER INBOX ──
+let _bcbDeployed = new Set(JSON.parse(localStorage.getItem('twc_bcb_deployed')||'[]'));
+
+function saveBCBDeployed(){
+  localStorage.setItem('twc_bcb_deployed', JSON.stringify([..._bcbDeployed]));
+}
+
+async function loadBCBInbox(){
+  const el = document.getElementById('bcb-inbox-list');
+  if(!el) return;
+  el.innerHTML = '<div style="font-size:.75em;color:#555;padding:4px">↻ Loading...</div>';
+  try {
+    const r = await fetch(FB_URL+'/bcb_rangers.json?t='+Date.now());
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const raw = await r.json();
+    renderBCBInbox(raw||{});
+    updateBCBBadge(raw||{});
+  } catch(e){
+    el.innerHTML = '<div style="font-size:.72em;color:#cc2200;padding:4px">⚠️ '+e.message+'</div>';
+  }
+}
+
+function renderBCBInbox(raw){
+  const el = document.getElementById('bcb-inbox-list');
+  if(!el) return;
+  let all = [];
+  Object.keys(raw).forEach(period=>{
+    const pd = raw[period];
+    if(!pd||typeof pd!=='object') return;
+    Object.keys(pd).forEach(key=>{
+      const e = pd[key];
+      if(e&&e.name) all.push({...e, _period:period, _key:key});
+    });
+  });
+  all.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+  if(!all.length){ el.innerHTML='<div style="font-size:.75em;color:#555;padding:4px">No rangers submitted yet.</div>'; return; }
+  let html='';
+  all.forEach(e=>{
+    const key = e._period+'_'+e._key;
+    const dep = _bcbDeployed.has(key);
+    const ts  = e.timestamp ? new Date(e.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    const pLabel = e._period||'?';
+    html += `<div style="display:flex;align-items:center;gap:6px;padding:5px 4px;border-bottom:1px solid #1a2a1a;opacity:${dep?.45:1}">
+      <span style="font-size:1.2em">🪖</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:.8em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.name||'Unknown'}</div>
+        <div style="font-size:.68em;color:#888">${pLabel.toUpperCase()} HOUR · ${ts}</div>
+      </div>
+      <button class="retro-btn sm" style="flex-shrink:0;${dep?'opacity:.3':''}"
+        ${dep?'disabled':''} onclick="deployBCBRanger('${key}','${e._period}','${e.name||''}')">
+        ${dep?'✓ DONE':'DEPLOY'}
+      </button>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function deployBCBRanger(key, period, name){
+  const mp = ['1st','2nd','5th','6th'].find(p=>period.startsWith(p)) ||
+             (period.startsWith('1')?'1st':period.startsWith('2')?'2nd':period.startsWith('5')?'5th':'6th');
+  _bcbDeployed.add(key);
+  saveBCBDeployed();
+  loadBCBInbox();
+  addLog('🪂 BCB Ranger "'+name+'" logged for '+CLS[mp].name+'!');
+  publishToFirebase();
+}
+
+function updateBCBBadge(raw){
+  let pending=0;
+  Object.keys(raw).forEach(period=>{
+    const pd=raw[period];
+    if(!pd||typeof pd!=='object')return;
+    Object.keys(pd).forEach(key=>{
+      if(!_bcbDeployed.has(period+'_'+key)) pending++;
+    });
+  });
+  const h2=document.querySelector('#bcb-panel h2');
+  if(h2){
+    const badge = pending>0 ? ` <span style="background:#cc2200;color:#fff;font-size:.7em;padding:1px 6px;border-radius:10px">${pending}</span>` : '';
+    h2.innerHTML = '🪂 BCB RANGER INBOX'+badge+' <button onclick="loadBCBInbox()" style="background:none;border:none;color:#ffd700;cursor:pointer;font-size:.9em;margin-left:6px" title="Refresh">↻</button>';
+  }
+}
+
+// ── STUDENT FIREBASE POLL (every 30s) ──
+let _studentPollIv = null;
+let _lastPublished = 0;
+
+function startStudentPoll(){
+  if(_studentPollIv) clearInterval(_studentPollIv);
+  pollFirebaseState();
+  _studentPollIv = setInterval(pollFirebaseState, 30000);
+}
+
+function stopStudentPoll(){
+  if(_studentPollIv){ clearInterval(_studentPollIv); _studentPollIv=null; }
+}
+
+async function pollFirebaseState(){
+  try {
+    const r = await fetch(FB_URL+'/twc_state.json?t='+Date.now());
+    if(!r.ok) return;
+    const d = await r.json();
+    if(!d||!d.published) return;
+    if(d.published===_lastPublished) return;
+    _lastPublished = d.published;
+    if(d.gold) S.gold = d.gold;
+    if(d.govt) S.govt = d.govt;
+    if(d.own)  S.own  = d.own;
+    if(d.blok) S.blok = d.blok;
+    if(d.skip) S.skip = d.skip;
+    if(d.nuked)S.nuked= d.nuked;
+    if(d.log)  S.log  = d.log;
+    renderStudentView(_currentStudentCls);
+    refreshMiniMap();
+    showStudentBanner('📡 Teacher updated the game!');
+  } catch{}
+}
+
+let _bannerTimeout=null;
+function showStudentBanner(msg){
+  let banner=document.getElementById('student-fb-banner');
+  if(!banner){
+    banner=document.createElement('div');
+    banner.id='student-fb-banner';
+    banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:2000;background:linear-gradient(90deg,#001a00,#0d2a0d);border-bottom:2px solid #00ff88;padding:8px 16px;font-family:var(--font);font-size:.82em;color:#00ff88;letter-spacing:1px;display:flex;align-items:center;gap:10px;animation:slideDown .4s ease';
+    banner.innerHTML='<span>📡</span><span id="student-fb-banner-msg"></span><button onclick="this.parentElement.style.display=\'none\'" style="margin-left:auto;background:none;border:none;color:#00ff88;cursor:pointer;font-size:1.1em">✕</button>';
+    document.body.appendChild(banner);
+    if(!document.getElementById('fb-banner-style')){
+      const st=document.createElement('style');
+      st.id='fb-banner-style';
+      st.textContent='@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}';
+      document.head.appendChild(st);
+    }
+  }
+  banner.style.display='flex';
+  document.getElementById('student-fb-banner-msg').textContent=msg;
+  if(_bannerTimeout) clearTimeout(_bannerTimeout);
+  _bannerTimeout=setTimeout(()=>{banner.style.display='none';},7000);
+}
+</script>
+
+<!-- Mini-map button styles (outside main CSS for simplicity) -->
+<style>
+#mini-refresh{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);border:1px solid #00ff00;color:#00ff00;font-family:'Courier New',monospace;font-size:.7em;padding:4px 10px;cursor:pointer;z-index:2}
+#mini-last-update{position:absolute;bottom:8px;left:8px;font-family:'Courier New',monospace;font-size:.65em;color:#00ff88;opacity:.7;z-index:2}
+</style>
+</body>
+</html>
